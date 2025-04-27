@@ -13,20 +13,14 @@ notes via the Web Audio API.
 
 Now supports **multi‑track canons** with per‑voice delay, waveform & volume! 🎶
 
----
-
 ## ✨ Features
 
-| | |
-| ---‑ | ‑--- |
-| 🎼 | Easy text notation (`C4 4`, `R 2`, directives) |
-| 🎛 | Per‑track `@track` blocks – polyphony & canons |
-| ⏱ | Accurate timing using future `osc.start()` scheduling |
-| 🔊 | Global / local `waveform`, `volume`, `tempo` |
-| 🛑 | `stop()` & `destroy()` for leak‑free cleanup |
-| 🟥 | Tiny footprint, no deps, TypeScript types included |
-
----
+- 🎼 Easy text notation (`C4 4`, `R 2`, directives)
+- 🎛 Per‑track `@track` blocks – polyphony & canons
+- ⏱ Accurate timing using future `osc.start()` scheduling
+- 🔊 Global / local `waveform`, `volume`, `tempo`
+- 🛑 `stop()` & `destroy()` for leak‑free cleanup
+- 🟥 Tiny footprint, no deps, TypeScript types included
 
 ## 🚀 Install
 
@@ -35,8 +29,6 @@ npm i buzzer-player
 ```
 
 Or drop the transpiled `dist/BuzzerPlayer.js` in a `<script type="module">` tag.
-
----
 
 ## 🔧 Quick Start
 
@@ -63,9 +55,9 @@ stopBtn.onclick = () => player.stop()
 ### 1  Directives
 
 ```text
-tempo   = 120   # BPM (global, can change mid‑script)
-waveform= square # sine | square | sawtooth | triangle
-volume  = 0.2   # 0‑1 linear gain
+tempo    = 120    # BPM (global, can change mid‑script)
+waveform = square # sine | square | sawtooth | triangle
+volume   = 0.2    # 0‑1 linear gain
 ```
 
 ### 2  Track Blocks
@@ -84,6 +76,7 @@ C4 4 D4 4 | E4 4 F4 4
 ```
 <Note><Octave?> <Denominator>
 C#4 8   # C‑sharp, octave 4, eighth‑note
+Cb4 8   # C‑flat, octave 4, eighth‑note
 R   4   # rest, quarter‑note
 ```
 
@@ -107,17 +100,14 @@ D4 4 E4 4 F#4 4 G4 4 | A4 4 B4 4 C#5 4 D5 4 |
 D4 4 E4 4 F#4 4 G4 4 | A4 4 B4 4 C#5 4 D5 4 |
 ```
 
-Load once with `player.playScript(canon)` and enjoy the staggered entry ✨.
+More examples in the [./public/demos](./public/demos) folder.
 
 ---
 
 ## 📚 API
 
 ```ts
-new BuzzerPlayer(options?)
-  options.volume?   // 0‑1 (default 0.2)
-  options.waveform? // OscillatorType (default 'square')
-  options.tempo?    // BPM (default 120)
+const player = new BuzzerPlayer(options) // See BuzzerPlayerOptions
 
 player.playScript(script: string): Promise<void>
 player.stop(): Promise<void>
@@ -140,4 +130,6 @@ PRs & ideas welcome on GitHub!
 
 ## 📝 License
 
-MIT © 2025 YourName
+MIT © 2025 @dragon-fish
+
+Co-developed with ChatGPT o-3

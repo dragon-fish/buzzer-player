@@ -17,6 +17,10 @@ const musicList = [
     url: './demos/Beethoven – Symphony No. 5 in C minor, Op. 67.bzs',
   },
   {
+    label: 'Hirokazu Tanaka - Tetris Theme A',
+    url: './demos/Hirokazu Tanaka - Tetris Theme A.bzs',
+  },
+  {
     label: 'Pachelbel – Canon in D',
     url: './demos/Pachelbel – Canon in D.bzs',
   },

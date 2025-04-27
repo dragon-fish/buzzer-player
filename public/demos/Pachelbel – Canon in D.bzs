@@ -1,236 +1,48 @@
-# Pachelbel – Canon in D (simplified)
-tempo   = 90
+# Pachelbel – Canon in D (simplified, canon structure)
+tempo   = 70
 waveform= square
 volume  = 0.20
 
-# ── Continuo / Ground ──────────────────────────────
-@track bass  delay=0    waveform=square    volume=0.1
+# ── Continuo / Ground (8 repetitions) ──────────────
+@track bass  delay=0    waveform=square    volume=0.12
 D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 2
 D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 3
 D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 4
 D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 5
 D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 6
 D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 7
 D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 8
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 9
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 10
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 11
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 12
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 13
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 14
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 15
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 16
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 17
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 18
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 19
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 20
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 21
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 22
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 23
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 24
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 25
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 26
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 27
-D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
-# variation 28
 D3 4 A2 4 B2 4 F#2 4 | G2 4 D2 4 G2 4 A2 4 |
 
 # ── Violin I (lead voice) ──────────────────────────
 @track violin1 delay=8  waveform=triangle volume=0.22
 F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 2
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 3
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 4
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 5
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 6
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 7
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 8
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 9
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 10
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 11
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 12
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 13
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 14
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 15
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 16
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 17
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 18
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 19
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 20
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 21
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 22
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 23
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 24
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 25
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 26
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 27
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 28
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
+D4 4 C#4 4 B3 4 A3 4 | G3 4 F#3 4 G3 4 E3 4 |
+F#3 4 D3 4 F#3 4 A3 4 | B3 4 A3 4 B3 4 C#4 4 |
+D4 4 C#4 4 D4 4 E4 4 | F#4 4 E4 4 F#4 4 G4 4 |
+F#4 4 D4 4 A4 4 F#4 4 | G4 4 E4 4 G4 4 E4 4 |
+F#4 4 D4 4 A3 4 B3 4 | C#4 4 D4 4 E4 4 F#4 4 |
+G4 4 G4 4 F#4 4 E4 4 | D4 4 C#4 4 B3 4 A3 4 |
+B3 4 G3 4 A3 4 F#3 4 | D4 2 D3 2 |
 
 # ── Violin II (enters 2 bars later) ────────────────
 @track violin2 delay=16 waveform=triangle volume=0.18
 F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 2
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 3
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 4
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 5
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 6
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 7
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 8
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 9
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 10
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 11
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 12
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 13
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 14
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 15
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 16
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 17
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 18
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 19
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 20
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 21
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 22
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 23
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 24
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 25
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 26
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 27
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 28
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
+D4 4 C#4 4 B3 4 A3 4 | G3 4 F#3 4 G3 4 E3 4 |
+F#3 4 D3 4 F#3 4 A3 4 | B3 4 A3 4 B3 4 C#4 4 |
+D4 4 C#4 4 D4 4 E4 4 | F#4 4 E4 4 F#4 4 G4 4 |
+F#4 4 D4 4 A4 4 F#4 4 | G4 4 E4 4 G4 4 E4 4 |
+F#4 4 D4 4 A3 4 B3 4 | C#4 4 D4 4 E4 4 F#4 4 |
+G4 4 G4 4 F#4 4 E4 4 | D4 4 C#4 4 B3 4 A3 4 |
+B3 4 G3 4 A3 4 F#3 4 | D4 2 D3 2 |
 
 # ── Violin III (enters 4 bars later) ───────────────
 @track violin3 delay=24 waveform=triangle volume=0.14
 F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 2
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 3
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 4
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 5
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 6
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 7
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 8
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 9
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 10
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 11
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 12
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 13
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 14
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 15
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 16
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 17
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 18
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 19
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 20
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 21
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 22
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 23
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 24
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 25
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 26
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 27
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
-# variation 28
-F#4 4 E4 4 D4 4 C#4 4 | B3 4 A3 4 B3 4 C#4 4 |
+D4 4 C#4 4 B3 4 A3 4 | G3 4 F#3 4 G3 4 E3 4 |
+F#3 4 D3 4 F#3 4 A3 4 | B3 4 A3 4 B3 4 C#4 4 |
+D4 4 C#4 4 D4 4 E4 4 | F#4 4 E4 4 F#4 4 G4 4 |
+F#4 4 D4 4 A4 4 F#4 4 | G4 4 E4 4 G4 4 E4 4 |
+F#4 4 D4 4 A3 4 B3 4 | C#4 4 D4 4 E4 4 F#4 4 |
+G4 4 G4 4 F#4 4 E4 4 | D4 4 C#4 4 B3 4 A3 4 |
+B3 4 G3 4 A3 4 F#3 4 | D4 2 D3 2 |
