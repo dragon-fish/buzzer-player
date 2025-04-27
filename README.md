@@ -132,4 +132,4 @@ PRs & ideas welcome on GitHub!
 
 MIT © 2025 @dragon-fish
 
-Co-developed with ChatGPT o-3
+Co-developed with ChatGPT-o3 & Claude 3.7

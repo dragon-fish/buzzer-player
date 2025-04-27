@@ -1,7 +1,7 @@
 {
   "name": "buzzer-player",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "chevrotain": "^11.0.3",
     "jsx-dom": "^8.1.6",
     "typescript": "~5.7.2",
     "vite": "^6.3.1"

@@ -1,3 +1,5 @@
+import { BzsParser } from './BzsParser.js'
+
 /**
  * BuzzerPlayer.ts
  *
@@ -6,15 +8,18 @@
  * different waveforms.
  *
  * @license MIT
- * @author ChatGPT-o3
  * @author dragon-fish <dragon-fish@qq.com>
+ * @author ChatGPT-o3 BzsParser
+ * @author Claude-3.7 Debugging
  */
+
 export class BuzzerPlayer {
   private ctx = new (window.AudioContext ||
     (window as any).webkitAudioContext)()
   private options: Required<BuzzerPlayerOptions>
   private scheduled: { osc: OscillatorNode; gain: GainNode }[] = []
   private playing = false
+  readonly bzs = new BzsParser()
 
   constructor(opts: BuzzerPlayerOptions = {}) {
     this.options = {
@@ -37,7 +42,9 @@ export class BuzzerPlayer {
 
     for (const ev of events) {
       const when = startAt + ev.start
-      if (ev.freq == null) continue // rest
+      // 改进休止符处理：检查频率是否为 null 或 NaN
+      if (ev.freq === null) continue // 跳过休止符或无效频率
+
       const osc = this.ctx.createOscillator()
       const gain = this.ctx.createGain()
       osc.type = ev.waveform
@@ -98,6 +105,7 @@ export class BuzzerPlayer {
    * NOTE TOKEN PAIRS
    *   <note><oct?> <denom>
    *   C#4 8   → C‑sharp octave 4, eighth‑note
+   *   Db4 8   → D‑flat octave 4, eighth‑note
    *   R 4     → rest, quarter‑note
    *
    *   NEW in 0.2.1: Parser tolerates barlines "|" and ignores stray tokens, so
@@ -105,133 +113,62 @@ export class BuzzerPlayer {
    * ```
    */
   parseScript(src: string): RawEvent[] {
-    const lines = src.split(/\r?\n/)
-    const tracks: TrackMeta[] = []
+    const ast = this.bzs.parse(src)
 
-    let cur: TrackMeta = {
-      offsetSec: 0,
-      waveform: this.options.waveform,
-      volume: this.options.volume,
-      curSec: 0,
-      events: [],
-    }
+    const globalTempo = ast.globals.tempo ?? this.options.tempo
+    const gWave = ast.globals.waveform ?? this.options.waveform
+    const gVolume = ast.globals.volume ?? this.options.volume
+    
+    const events: RawEvent[] = []
 
-    let tempo = this.options.tempo
-    const noteRe = /^([A-GR](?:#|b)?)(\d?)$/i
+    for (const track of ast.tracks) {
+      const waveform = (track.waveform ?? gWave) as OscillatorType
+      const volume = track.volume ?? gVolume
+      const tempo = track.tempo ?? globalTempo  // 使用轨道特定的tempo或全局tempo
+      const beatSec = 60 / tempo                // 基于轨道tempo计算节拍时长
+      const offset = track.delay * beatSec
 
-    const pushTrack = () => {
-      if (cur.events.length) tracks.push(cur)
-    }
+      let curSec = 0
+      for (const tok of track.tokens) {
+        const durSec = (4 / tok.duration) * beatSec // denom → seconds
 
-    for (const raw of lines) {
-      const line = raw.trim()
-      if (!line || line.startsWith('#')) continue
+        if (tok.note === 'R') {
+          // rest
+          events.push({
+            freq: null,
+            start: offset + curSec,
+            dur: durSec,
+            waveform,
+            volume,
+          })
+        } else {
+          const sym = tok.accidental
+            ? (`${tok.note}${tok.accidental}` as NoteSymbol)
+            : (tok.note as NoteSymbol)
+          const octave = tok.octave ?? 4
+          const freq = BuzzerPlayer.noteToFreq(sym, octave)
 
-      // Track declaration
-      if (line.startsWith('@track')) {
-        pushTrack()
-        const parts = line.split(/\s+/)
-        let delayBeats = 0
-        let wv = cur.waveform
-        let vol = cur.volume
-        for (const p of parts.slice(2)) {
-          const [k, v] = p.split('=')
-          if (k === 'delay') delayBeats = Number(v) || 0
-          if (k === 'waveform' && v) wv = v as OscillatorType
-          if (k === 'volume' && v) vol = Math.max(0, Math.min(1, Number(v)))
+          events.push({
+            freq,
+            start: offset + curSec,
+            dur: durSec,
+            waveform,
+            volume,
+          })
         }
-        cur = {
-          offsetSec: (60 / tempo) * delayBeats,
-          waveform: wv,
-          volume: vol,
-          curSec: 0,
-          events: [],
-        }
-        continue
-      }
-
-      // Global directive
-      const kv = line.match(/^([a-zA-Z]+)\s*=\s*(.+)$/)
-      if (kv) {
-        const [, k, v] = kv
-        switch (k.toLowerCase()) {
-          case 'tempo':
-            tempo = Number(v) || tempo
-            break
-          case 'waveform':
-            cur.waveform = v as OscillatorType
-            break
-          case 'volume':
-            cur.volume = Math.max(0, Math.min(1, Number(v)))
-            break
-        }
-        continue
-      }
-
-      // Token stream parser (stateful) — handles barlines "|"
-      const tokens = line.split(/\s+/).filter(Boolean)
-      let pendingNote: string | null = null
-      for (const tok of tokens) {
-        if (/^\|+$/.test(tok)) continue // ignore barlines
-        if (noteRe.test(tok)) {
-          // note symbol
-          pendingNote = tok
-          continue
-        }
-        if (/^\d+$/.test(tok) && pendingNote) {
-          // duration
-          const denom = Number(tok)
-          if (!denom) {
-            pendingNote = null
-            continue
-          }
-          const durSec = (4 / denom) * (60 / tempo)
-          const [, noteSym, octStr] = pendingNote.match(
-            noteRe
-          ) as RegExpMatchArray
-          if (noteSym.toUpperCase() === 'R') {
-            cur.events.push({
-              freq: null,
-              start: cur.offsetSec + cur.curSec,
-              dur: durSec,
-              waveform: cur.waveform,
-              volume: cur.volume,
-            })
-          } else {
-            const oct = octStr ? Number(octStr) : 4
-            const freq = BuzzerPlayer.noteToFreq(
-              `${noteSym[0].toUpperCase()}${noteSym.slice(1)}` as NoteSymbol,
-              oct
-            )
-            cur.events.push({
-              freq,
-              start: cur.offsetSec + cur.curSec,
-              dur: durSec,
-              waveform: cur.waveform,
-              volume: cur.volume,
-            })
-          }
-          cur.curSec += durSec
-          pendingNote = null
-          continue
-        }
-        // unrecognised token — reset state
-        pendingNote = null
+        curSec += durSec
       }
     }
-    pushTrack()
 
-    const all = tracks.flatMap((t) => t.events)
-    all.sort((a, b) => a.start - b.start)
-
-    console.info('parseScript', {
-      tempo,
-      waveform: this.options.waveform,
-      volume: this.options.volume,
-      tracks: all.length,
-      events: all,
+    events.sort((a, b) => a.start - b.start)
+    console.info('parseScript(result)', {
+      ast,
+      tempo: globalTempo,
+      waveform: gWave,
+      volume: gVolume,
+      events,
     })
-    return all
+    return events
   }
 
   /*──────────────────────────────────────────────────────────────────────────*/

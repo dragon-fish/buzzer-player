@@ -1,5 +1,6 @@
 import './style.css'
-import { BuzzerPlayer } from './BuzzerPlayer'
+import { BuzzerPlayer } from './BuzzerPlayer/BuzzerPlayer.js'
+import { isRecognitionException } from 'chevrotain'
 
 const $root = document.getElementById('root') as HTMLElement
 const baseURL = new URL(import.meta.env.BASE_URL, window.location.href)
@@ -24,6 +25,10 @@ const musicList = [
     label: 'Pachelbel – Canon in D',
     url: './demos/Pachelbel – Canon in D.bzs',
   },
+  {
+    label: 'debug song: writen by AI',
+    url: './demos/debug.bzs',
+  },
 ]
 
 const buzzer = new BuzzerPlayer({
@@ -31,6 +36,7 @@ const buzzer = new BuzzerPlayer({
   waveform: 'sine',
   volume: 0.5,
 })
+;(window as any).buzzer = buzzer
 
 const MusicSelector = ({
   list,
@@ -107,7 +113,16 @@ const App = () => {
       >
         <button
           onClick={() => {
-            buzzer.playScript($notesInput.value)
+            buzzer.playScript($notesInput.value).catch((e) => {
+              console.error('Error playing script:', e)
+              if (isRecognitionException(e)) {
+                alert(
+                  `ParserError: ${e.message}\nLine: ${e.line}\nColumn: ${e.column}`
+                )
+              } else {
+                alert(`Error: ${e.message}`)
+              }
+            })
           }}
         >
           Play
