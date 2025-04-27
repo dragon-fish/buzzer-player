@@ -2,6 +2,7 @@ import './style.css'
 import { BuzzerPlayer } from './BuzzerPlayer'
 
 const $root = document.getElementById('root') as HTMLElement
+const baseURL = new URL(import.meta.env.BASE_URL, window.location.href)
 
 const buzzer = new BuzzerPlayer({
   tempo: 120,
@@ -12,7 +13,7 @@ const buzzer = new BuzzerPlayer({
 const App = () => {
   const $notesInput = (<textarea id="bzs"></textarea>) as HTMLInputElement
 
-  fetch('/demos/Pachelbel – Canon in D.bzs')
+  fetch(new URL('./demos/Pachelbel – Canon in D.bzs', baseURL))
     .then((res) => {
       return res.text()
     })
