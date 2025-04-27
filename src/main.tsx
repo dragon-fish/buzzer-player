@@ -26,10 +26,10 @@ const App = () => {
 
   return (
     <main>
-      <h1>BazzerPlayer</h1>
+      <h1>Buzzer Player</h1>
       <p>Lightweight WebAudio library for browser‑side “buzzer” melodies.</p>
       <div>
-        <label htmlFor="bzs">Bazzer Script (.BZS)</label>
+        <label htmlFor="bzs">Buzzer Script (.BZS)</label>
         {$notesInput}
       </div>
       <div
