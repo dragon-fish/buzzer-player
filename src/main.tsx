@@ -61,6 +61,7 @@ const App = () => {
   const $notesInput = (<textarea id="bzs"></textarea>) as HTMLInputElement
   const $musicSelector = (
     <MusicSelector
+      // @ts-ignore
       style={{ width: '100%' }}
       list={musicList}
       onChange={(url) => {
