@@ -1,0 +1,218 @@
+// ============================================
+// Canon in D (8bit Version) - BZS v0.3.0
+// Adapted for chiptune style
+// ============================================
+
+// 全局设置
+tempo=90
+ticks_per_beat=96
+master_volume=0.65
+time_signature=4/4
+key=D
+
+// ============================================
+// 主旋律轨道 (Voice 1 - 最高声部)
+// 使用脉冲波，占空比变化制造音色对比
+// ============================================
+@track melody1 delay=0 waveform=pulse duty=25 volume=0.15
+// 包络：类似弦乐的起音
+:env a=4 d=16 s=0.8 r=12
+
+// 第一主题 (D大调上行)
+:slide time=8
+D5 4 | A5 4 | B5 4 | F#5 4 |
+:slide off
+
+G5 4 | D5 4 | G5 4 | A5 4 |
+B5 4 | A5 4 | G5 4 | F#5 4 |
+E5 4 | F#5 4 | G5 4 | E5 4 |
+
+// 装饰性颤音
+:vib depth=0.2 rate=8
+C#5 4 | D5 4 | R 2
+:vib off
+
+// ============================================
+// 对位旋律 (Voice 2 - 中声部)
+// 延后2小节进入，形成卡农
+// ============================================
+@track melody2 delay=8 waveform=pulse duty=50 volume=0.12
+:env a=8 d=24 s=0.7 r=16
+
+// 第二声部主题 (比第一声部低三度)
+:slide time=6
+B4 4 | F#5 4 | G5 4 | D5 4 |
+:slide off
+
+E5 4 | B4 4 | E5 4 | F#5 4 |
+G5 4 | F#5 4 | E5 4 | D5 4 |
+C#5 4 | D5 4 | E5 4 | C#5 4 |
+
+A4 4 | B4 4 | R 2
+
+// ============================================
+// 和声基础 (Voice 3 - 低声部)
+// 三角波提供浑厚的低音
+// ============================================
+@track bass delay=0 waveform=triangle volume=0.18
+:env lead
+:gate 0.85  // 轻微断奏让低音更清晰
+
+// 基础和声进行 (D - A - Bm - F#m - G - D - G - A)
+// 每个和弦2拍
+
+// 第一组和弦 (D - A)
+[ D3 A3 ] 2 | [ A2 E3 ] 2 |
+// 使用琶音增强和声效果
+:arp semi 4 7 rate=12
+[ B2 F#3 ] 2 | [ F#2 C#3 ] 2 |
+:arp off
+
+// 第二组和弦 (G - D)
+:arp semi 3 7 rate=10
+[ G2 D3 ] 2 | [ D3 A3 ] 2 |
+:arp off
+
+// 第三组和弦 (G - A)
+[ G2 D3 ] 2 | [ A2 E3 ] 2 |
+
+// ============================================
+// 节奏声部 (Percussion)
+// 使用噪声声道模拟鼓点
+// ============================================
+@track drums delay=0 waveform=noise volume=0.10
+:env perc
+:noise mode=short pitch=15
+
+// 定义鼓点Pattern
+@pattern drum_basic
+:gate 0.3
+C2 8  C2 16 R 16  // 模拟踩镲+小军鼓
+:gate 0.7
+C1 4              // 底鼓
+:gate 0.3
+C2 8  C2 16 R 16
+:gate 0.5
+C1 8  C2 8        // 底鼓+军鼓
+@end
+
+@pattern drum_fill
+:gate 0.2
+C2 16 C2 16 C2 16 C2 16
+:gate 0.6
+C1 16 C2 16 C1 16 C2 16
+:gate 0.8
+C1 8  C1 8  C1 8  C1 8
+@end
+
+// 节奏结构
+:loop 3
+  :call drum_basic
+:endloop
+
+:call drum_fill
+
+:loop 2
+  :call drum_basic
+:endloop
+
+// ============================================
+// 对位旋律 (Voice 4 - 最低声部)
+// 延后4小节进入，完成四声部卡农
+// ============================================
+@track melody3 delay=16 waveform=triangle volume=0.10
+:env a=12 d=32 s=0.6 r=20
+:gate 0.9
+
+// 第三声部主题 (比第二声部低五度)
+F#4 4 | C#5 4 | D5 4 | A4 4 |
+B4 4 | F#4 4 | B4 4 | C#5 4 |
+D5 4 | C#5 4 | B4 4 | A4 4 |
+G4 4 | A4 4 | B4 4 | G4 4 |
+
+E4 4 | F#4 4 | R 2
+
+// ============================================
+// 装饰音轨 (Arpeggio Layer)
+// 用琶音填充和声，增加华丽感
+// ============================================
+@track arp_layer delay=8 waveform=pulse duty=12 volume=0.08
+:env pluck
+:gate 0.7
+
+// 琶音Pattern
+@pattern arp_chord_D
+:arp semi 4 7 rate=6
+[ D4 A4 ] 4
+:arp off
+@end
+
+@pattern arp_chord_A
+:arp semi 4 7 rate=6
+[ A3 E4 ] 4
+:arp off
+@end
+
+@pattern arp_chord_Bm
+:arp semi 3 7 rate=6
+[ B3 F#4 ] 4
+:arp off
+@end
+
+@pattern arp_chord_Fsm
+:arp semi 3 7 rate=6
+[ F#3 C#4 ] 4
+:arp off
+@end
+
+@pattern arp_chord_G
+:arp semi 4 7 rate=6
+[ G3 D4 ] 4
+:arp off
+@end
+
+// 琶音序列 (跟随和声进行)
+:call arp_chord_D
+:call arp_chord_A
+:call arp_chord_Bm
+:call arp_chord_Fsm
+:call arp_chord_G
+:call arp_chord_D
+:call arp_chord_G
+:call arp_chord_A
+
+// ============================================
+// 高潮部分 (所有声部汇合)
+// ============================================
+@track climax_pulse delay=24 waveform=pulse duty=75 volume=0.20
+:env a=2 d=8 s=0.9 r=4
+:vib depth=0.3 rate=6
+
+// 高潮旋律
+D6 2. | A6 2 | B6 2 | F#6 2 |
+G6 2 | D6 2 | G6 2 | A6 4.. |
+
+:vib off
+:slide time=16
+B6 1
+:slide off
+
+// ============================================
+// 结尾部分
+// ============================================
+@track ending delay=32 waveform=triangle volume=0.15
+:env a=20 d=48 s=0.5 r=96
+
+// 缓慢的终止式
+:tempo 60
+:vib depth=0.1 rate=16
+D5 4 | A4 4 | B4 4 | F#4 4 |
+G4 4 | D4 4 | [ D3 D4 ] 2.. | R 1 |
+
+// 淡出效果
+:vol 0.12
+D4 4
+:vol 0.08
+A3 4
+:vol 0.04
+D3 8..

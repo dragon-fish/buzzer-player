@@ -1,0 +1,303 @@
+// ============================================
+// Beethoven Symphony No.5 "Fate" - BZS v0.3.0
+// 8bit Chiptune Adaptation - First Movement Opening
+// ============================================
+
+// 全局设置 - 庄重紧张的氛围
+tempo=108
+ticks_per_beat=96
+master_volume=0.6
+time_signature=2/4
+key=Cm
+
+// ============================================
+// 核心动机轨道 (Fate Motif)
+// 使用强断奏的脉冲波
+// ============================================
+@track fate_motif delay=0 waveform=pulse duty=25 volume=0.22
+:env a=0 d=8 s=0 r=0      // 非常尖锐的打击感
+:gate 0.35                // 强烈的断奏
+
+// 命运敲门声：G G G Eb
+:tempo 100                // 稍慢的引子
+[ G3 G3 G3 ] 16           // 三个紧凑的G音
+:tempo 108
+Eb4 8..                   // 延长的Eb
+
+R 8                       // 戏剧性的停顿
+
+// 重复并发展
+[ F3 F3 F3 ] 16
+D4 8..
+
+R 4
+
+// ============================================
+// 对位回应轨道
+// 三角波提供厚重回应
+// ============================================
+@track response delay=2 waveform=triangle volume=0.18
+:env a=4 d=32 s=0.7 r=20
+:vib depth=0.15 rate=12
+
+// 命运主题的回应
+:arp semi 0 12 rate=24    // 八度跳跃增强气势
+Eb3 4 | G3 4 | Bb3 4 | D4 4 |
+:arp off
+
+// 紧张的上行音阶
+:slide time=6
+C4 16 D4 16 Eb4 16 F4 16 | G4 8 Ab4 8
+:slide off
+
+// ============================================
+// 弦乐群背景 (低音部)
+// 持续的紧张和声
+// ============================================
+@track strings_bass delay=0 waveform=triangle volume=0.15
+:env a=16 d=48 s=0.5 r=64
+:gate 0.85
+
+// C小调主和弦持续
+@pattern cm_chord
+[ C2 G2 C3 ] 2
+@end
+
+@pattern g_chord
+[ G2 D3 G3 ] 2
+@end
+
+// 交替的紧张和声
+:loop 4
+  :call cm_chord
+:endloop
+
+:call g_chord
+:call cm_chord
+
+// 半音下行制造紧张感
+[ Bb1 F2 Bb2 ] 1
+[ A1 E2 A2 ] 1
+[ Ab1 Eb2 Ab2 ] 1
+[ G1 D2 G2 ] 1
+
+// ============================================
+// 铜管声部 (高潮)
+// 厚实的脉冲波模拟铜管
+// ============================================
+@track brass delay=4 waveform=pulse duty=75 volume=0.20
+:env a=8 d=40 s=0.8 r=32
+:vib depth=0.25 rate=8
+
+// 铜管主题
+:slide time=16
+Eb4 2 | G4 2 | Bb4 2 | D5 2
+:slide off
+
+:gate 0.7
+C5 8 C5 8 C5 8 C5 8 | Bb4 4 Ab4 4 G4 4
+
+// 强力宣言
+:vol 0.25
+:vib depth=0.4 rate=6
+Eb5 1.
+:vib off
+
+// ============================================
+// 打击乐与定音鼓
+// 噪声+低音脉冲模拟
+// ============================================
+@track percussion delay=0 waveform=noise volume=0.12
+:env perc
+
+// 定音鼓Pattern
+@pattern timpani_roll
+:gate 0.4
+:noise mode=long pitch=8
+C1 32 C1 32 C1 32 C1 32
+:noise mode=short pitch=12
+C2 8
+@end
+
+// 强拍强调
+@pattern strong_beat
+:noise mode=short pitch=15
+:gate 0.9
+C2 4
+:gate 0.3
+C2 16 C2 16
+@end
+
+// 节奏结构
+:call strong_beat
+R 4
+
+:loop 2
+  :call timpani_roll
+:endloop
+
+:call strong_beat
+:call strong_beat
+
+// ============================================
+// 弦乐震音 (紧张背景)
+// 快速颤音制造紧张
+// ============================================
+@track tremolo delay=0 waveform=pulse duty=12 volume=0.10
+:env a=0 d=96 s=0.3 r=0
+:gate 0.2
+
+// 震音Pattern
+@pattern tremolo_cm
+:vib depth=0.08 rate=4
+[ C5 G5 ] 16 [ C5 G5 ] 16 [ C5 G5 ] 16 [ C5 G5 ] 16
+:vib off
+@end
+
+@pattern tremolo_g
+:vib depth=0.08 rate=4
+[ G5 D6 ] 16 [ G5 D6 ] 16 [ G5 D6 ] 16 [ G5 D6 ] 16
+:vib off
+@end
+
+// 持续震音
+:loop 8
+  :call tremolo_cm
+:endloop
+
+:loop 4
+  :call tremolo_g
+:endloop
+
+// ============================================
+// 发展部 (音乐展开)
+// 展示BZS的动态变化能力
+// ============================================
+@track development delay=16 waveform=pulse duty=50 volume=0.18
+:env a=4 d=24 s=0.6 r=16
+:gate 0.65
+
+// 主题变奏
+:tempo 120
+:arp semi 0 4 7 rate=8    // 分解和弦
+G4 2 | Eb4 2 | C4 2 | G3 2
+:arp off
+
+:tempo 132                 // 加速
+:slide speed=0.02
+[ F4 A4 C5 ] 1             // 上行滑音和弦
+:slide off
+
+// 快速音阶跑动
+:gate 0.5
+:tempo 150
+G4 16 A4 16 Bb4 16 C5 16 | D5 16 Eb5 16 F5 16 G5 16
+Ab5 8 G5 8 F5 8 Eb5 8 | D5 8 C5 8 Bb4 8 A4 8
+
+// ============================================
+// 全奏高潮 (Tutti)
+// 所有声部汇合
+// ============================================
+@track tutti delay=24 waveform=pulse duty=75 volume=0.25
+:env a=2 d=12 s=0.9 r=8
+:gate 0.8
+:vib depth=0.3 rate=6
+
+// 命运主题强力再现
+:tempo 108
+:vol 0.28
+[ G4 G4 G4 ] 16
+Eb5 8..
+
+[ F4 F4 F4 ] 16
+D5 8..
+
+// 连续强力和弦
+:gate 0.9
+[ Eb4 G4 Bb4 ] 4 | [ D4 F4 A4 ] 4 | [ C4 Eb4 G4 ] 4 | [ Bb3 D4 F4 ] 4
+
+// 推向顶峰
+:tempo 92
+:slide time=32
+[ G3 Bb3 D4 G4 ] 1..
+:slide off
+
+// ============================================
+// 结尾部 (Coda)
+// 紧张气氛逐渐化解
+// ============================================
+@track coda delay=32 waveform=triangle volume=0.15
+:env a=24 d=96 s=0.4 r=128
+:vib depth=0.1 rate=16
+
+// 渐慢渐弱
+:tempo 80
+:vol 0.18
+G3 4 | Eb4 4 | C4 4 | G3 4
+
+:tempo 60
+:vol 0.12
+[ C3 G3 C4 ] 2 | R 2
+
+:tempo 40
+:vol 0.08
+C3 4..
+
+// 最后微弱的命运动机回声
+:env a=8 d=64 s=0.2 r=96
+:gate 0.3
+G2 16 G2 16 G2 16
+:tempo 30
+Eb3 8..
+
+// ============================================
+// 特殊效果轨道 (Sfx)
+// 展示BZS的特殊效果能力
+// ============================================
+@track sfx delay=0 waveform=noise volume=0.08
+// 开场雷鸣效果
+:env a=0 d=128 s=0 r=0
+:noise mode=long pitch=4
+C0 1                      // 低噪声模拟雷声
+R 2
+
+// 紧张氛围的嘶嘶声
+@pattern tension_hiss
+:noise mode=short pitch=31
+:gate 0.15
+C2 32 C2 32 C2 32 C2 32
+@end
+
+:loop 8
+  :call tension_hiss
+:endloop
+
+// ============================================
+// 动态节奏控制轨道
+// 展示BZS的节奏编程能力
+// ============================================
+@track rhythm_control delay=0 waveform=pulse duty=50 volume=0.05
+// 仅用于触发节奏变化，音量极低几乎听不见
+
+// 复杂节奏Pattern
+@pattern syncopated_rhythm
+:gate 0.9
+C6 32 R 32 C6 32 R 32 C6 32 R 32 C6 32
+:gate 0.6
+C6 16 C6 16 C6 16 C6 16
+@end
+
+@pattern polyrhythm
+// 三对二的复合节奏
+:loop 3
+  :gate 0.7
+  C6 24
+  :gate 0.4
+  C6 24
+:endloop
+@end
+
+// 交错节奏
+:call syncopated_rhythm
+:call polyrhythm
+:call syncopated_rhythm

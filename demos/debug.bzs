@@ -1,0 +1,469 @@
+// ============================================
+// 《四季之歌》Seasons Cycle - BZS v0.3.0
+// Author: Deepseek
+// ============================================
+
+// 全局设置
+tempo=120
+ticks_per_beat=96
+master_volume=0.78
+time_signature=3/4  // 华尔兹节奏，更富诗意
+key=C
+
+// ============================================
+// 主题动机：四季循环主题
+// 这个主题会在每个季节以不同形式再现
+// ============================================
+@pattern season_theme
+// C大调上行，象征生命循环
+:env a=4 d=16 s=0.7 r=12
+C4 8 E4 8 G4 4 | A4 8 G4 8 E4 4 |
+C4 8 D4 8 E4 4 | G4 2..
+:env off
+@end
+
+// ============================================
+// 第一乐章：春之苏醒
+// 明亮活泼，生机勃勃
+// ============================================
+@track spring_lead delay=0 waveform=pulse duty=12 volume=0.20
+// 小鸟鸣叫般的明亮音色
+:env a=2 d=8 s=0.9 r=6
+:gate 0.8
+
+// 春主题：上行琶音象征生长
+:arp semi 0 4 7 rate=8
+C5 2 | E5 2 | G5 2
+:arp off
+
+// 春雨滴落般的快速音符
+:gate 0.6
+[ G4 E4 C4 ] 16 [ A4 F4 D4 ] 16 [ B4 G4 E4 ] 16 [ C5 A4 F4 ] 16
+
+// 春之舞曲
+@pattern spring_dance
+:vib depth=0.1 rate=12
+G4 8 A4 8 B4 4 | C5 8 B4 8 A4 4 |
+G4 8 F4 8 E4 4 | D4 2..
+:vib off
+@end
+
+:call spring_dance
+
+// 花开的瞬间
+:tempo 140
+:slide time=8
+C6 1..
+:slide off
+:tempo 120
+
+// ============================================
+// 春之伴奏：溪流潺潺
+// ============================================
+@track spring_stream delay=0 waveform=triangle volume=0.12
+:env a=12 d=48 s=0.4 r=64
+:gate 0.9
+
+// 持续的低音基础
+@pattern stream_base
+[ C3 G3 ] 2
+@end
+
+// 溪流的波纹
+@pattern stream_ripple
+:arp semi 0 7 12 rate=16
+C4 4
+:arp off
+@end
+
+:loop 8
+  :call stream_base
+:endloop
+
+// 间奏：雨滴效果
+:env a=0 d=4 s=0 r=0
+:gate 0.3
+E5 32 F5 32 G5 32 A5 32
+
+// ============================================
+// 第二乐章：夏之热情
+// 热烈奔放，充满活力
+// ============================================
+@track summer_main delay=16 waveform=pulse duty=50 volume=0.22
+:env a=0 d=12 s=0.8 r=8
+:gate 0.7
+
+// 夏主题：强烈的节奏感
+:tempo 140
+C5 4 E5 4 G5 4 | A5 8 G5 8 F5 8 E5 8 |
+D5 4 F5 4 A5 4 | G5 8 F5 8 E5 8 D5 8 |
+
+// 雷雨效果
+:tempo 160
+:vol 0.25
+:vib depth=0.4 rate=6
+[ G5 Bb5 D6 ] 8  // 小调和弦制造紧张感
+:vib off
+:vol 0.22
+
+// 夏夜狂欢
+@pattern summer_night
+:arp semi 0 3 7 rate=4
+C5 1
+:arp off
+:gate 0.4
+E5 16 F5 16 G5 16 A5 16 B5 16 C6 16
+@end
+
+:call summer_night
+
+// ============================================
+// 夏之打击：热带节奏
+// ============================================
+@track summer_perc delay=16 waveform=noise volume=0.15
+:env perc
+
+// 热带鼓点
+@pattern tropical_beat
+:noise mode=short pitch=20
+:gate 0.9
+C2 8
+:gate 0.3
+C2 16 C2 16
+:noise mode=long pitch=12
+C1 4
+@end
+
+@pattern summer_fill
+:noise mode=short pitch=31
+:gate 0.2
+C2 32 C2 32 C2 32 C2 32 C2 32 C2 32
+@end
+
+:loop 4
+  :call tropical_beat
+:endloop
+
+:call summer_fill
+
+// ============================================
+// 第三乐章：秋之沉思
+// 温和忧伤，金色收获
+// ============================================
+@track autumn_melody delay=32 waveform=pulse duty=75 volume=0.18
+:env a=8 d=32 s=0.6 r=24
+:gate 0.9
+:tempo 100  // 放慢速度
+
+// 秋主题：略带忧伤的旋律
+:vib depth=0.15 rate=16
+A4 4 C5 4 E5 4 | G5 8 F5 8 E5 8 D5 8 |
+C5 4 E5 4 G5 4 | B5 8 A5 8 G5 8 F5 8 |
+:vib off
+
+// 落叶飘零效果
+@pattern falling_leaves
+:gate 0.5
+:slide time=12
+G5 8 F5 8 E5 8 D5 8
+:slide off
+C5 2..
+@end
+
+:call falling_leaves
+
+// 秋风扫过
+:env a=4 d=16 s=0.3 r=12
+:gate 0.3
+:arp semi 12 7 0 rate=24  // 下行琶音
+C6 2
+:arp off
+
+// ============================================
+// 秋之和声：金色麦浪
+// ============================================
+@track autumn_harmony delay=32 waveform=triangle volume=0.14
+:env a=16 d=48 s=0.5 r=64
+
+// 温暖的和声进行
+@pattern autumn_chords
+[ C4 E4 G4 ] 2 | [ A3 C4 E4 ] 2 |
+[ G3 B3 D4 ] 2 | [ F3 A3 C4 ] 2 |
+@end
+
+:call autumn_chords
+
+// 收获的喜悦
+:tempo 120
+:gate 0.8
+[ C5 E5 G5 ] 8 [ D5 F5 A5 ] 8 [ E5 G5 B5 ] 8 [ F5 A5 C6 ] 8
+
+// ============================================
+// 第四乐章：冬之寂静
+// 清冷纯净，雪花飘落
+// ============================================
+@track winter_crystal delay=48 waveform=pulse duty=25 volume=0.16
+:env a=12 d=64 s=0.3 r=96
+:gate 0.95
+:tempo 80
+
+// 冬主题：纯净的旋律线
+:arp semi 0 5 7 rate=32  // 缓慢的琶音，像冰晶形成
+C5 4.. | E5 4.. | G5 4.. |
+
+// 雪花飘落
+@pattern snowflake
+:env a=2 d=8 s=0 r=4
+:gate 0.3
+E6 32 G6 32 C7 32 E7 32
+:env a=12 d=64 s=0.3 r=96
+@end
+
+:call snowflake
+:call snowflake
+
+// 冰柱滴落效果
+:env a=0 d=24 s=0 r=0
+:gate 0.4
+:slide time=48
+C6 2..
+:slide off
+
+// ============================================
+// 冬之氛围：寒风呼啸
+// ============================================
+@track winter_wind delay=48 waveform=noise volume=0.10
+:env a=0 d=128 s=0.1 r=0
+
+// 风声效果
+@pattern wind_sweep
+:noise mode=long pitch=4
+:gate 0.2
+C0 1..
+:noise mode=short pitch=31
+:gate 0.1
+C2 16 C2 16 C2 16 C2 16
+@end
+
+@pattern snowfall
+:noise mode=short pitch=28
+:gate 0.05
+C2 32 C2 32 C2 32 C2 32 C2 32 C2 32 C2 32 C2 32
+@end
+
+:call wind_sweep
+:call snowfall
+
+// ============================================
+// 过渡乐段：季节更迭
+// 展示BZS的动态过渡能力
+// ============================================
+@track transitions waveform=pulse duty=50 volume=0.18
+:env a=4 d=16 s=0.7 r=12
+
+// 春→夏：温度升高
+:tempo 120
+C5 4 E5 4 G5 4
+:tempo 140
+A5 4 C6 4 E6 4
+
+// 夏→秋：热情减退
+:vib depth=0.3 rate=8
+G5 2
+:vib depth=0.15 rate=16
+F5 2
+:tempo 100
+E5 2
+
+// 秋→冬：逐渐冷却
+:slide time=24
+D5 1..
+:slide off
+:tempo 80
+C5 2..
+
+// ============================================
+// 循环结构：四季轮回
+// ============================================
+@track season_cycle waveform=triangle volume=0.12
+:env a=24 d=96 s=0.4 r=128
+
+// 循环主题，象征永恒轮回
+:loop inf
+  // 春
+  :tempo 120
+  :call season_theme
+  
+  // 夏
+  :tempo 140
+  :vib depth=0.2 rate=12
+  :call season_theme
+  :vib off
+  
+  // 秋
+  :tempo 100
+  :gate 0.85
+  :call season_theme
+  :gate 0.95
+  
+  // 冬
+  :tempo 80
+  :arp semi 0 7 12 rate=48
+  :call season_theme
+  :arp off
+:endloop
+
+// ============================================
+// 自然音效轨道
+// 展示BZS的环境音效能力
+// ============================================
+@track nature_sfx waveform=noise volume=0.08
+// 春：鸟鸣
+@pattern birds_chirp
+:noise mode=short pitch=30
+:env a=0 d=2 s=0 r=0
+:gate 0.15
+C2 64 C2 64 C2 64
+@end
+
+// 夏：蝉鸣
+@pattern cicadas
+:noise mode=short pitch=25
+:gate 0.1
+C2 128
+@end
+
+// 秋：风声
+@pattern autumn_wind
+:noise mode=long pitch=6
+:gate 0.2
+C0 2
+@end
+
+// 冬：雪地脚步声
+@pattern snow_steps
+:noise mode=short pitch=18
+:env a=0 d=4 s=0 r=0
+:gate 0.3
+C2 8 R 24 C2 8 R 24
+@end
+
+// 音效播放（稀疏出现，不干扰音乐）
+:loop 2
+  R 16
+  :call birds_chirp
+:endloop
+
+:loop 1
+  R 8
+  :call cicadas
+:endloop
+
+:call autumn_wind
+:call snow_steps
+
+// ============================================
+// 结尾：回归与展望
+// ============================================
+@track finale delay=64 waveform=pulse duty=75 volume=0.20
+:env a=8 d=32 s=0.8 r=48
+:gate 0.9
+
+// 四季主题汇总
+:tempo 100
+:vib depth=0.1 rate=16
+
+// 春的片段
+C5 4 E5 4 G5 4
+
+// 夏的片段
+:tempo 120
+A5 8 G5 8 F5 8 E5 8
+
+// 秋的片段
+:tempo 80
+D5 4 F5 4 A5 4
+
+// 冬的片段
+:tempo 60
+G5 2..
+
+// 回归主题，渐慢渐弱
+:tempo 40
+:slide time=64
+[ C4 E4 G4 C5 ] 1..
+:slide off
+
+:tempo 30
+:vol 0.12
+C4 4 E4 4 G4 4
+
+:tempo 20
+:vol 0.08
+[ C3 G3 C4 ] 2..
+
+// 最后的循环暗示
+:tempo 120
+:vol 0.05
+:arp semi 0 4 7 rate=96
+C3 4..
+:arp off
+
+// ============================================
+// 特殊效果：季节变换的视觉联想
+// 用音高变化模拟色彩变化
+// ============================================
+@track color_spectrum waveform=pulse duty=25 volume=0.06
+// 低音量背景，为可视化提供数据
+
+// 春：绿色光谱 (中频)
+:loop 4
+  C4 8 E4 8 G4 8
+:endloop
+
+// 夏：红色光谱 (高频)
+:loop 4
+  A4 8 C5 8 E5 8
+:endloop
+
+// 秋：金色光谱 (中低频)
+:loop 4
+  G3 8 B3 8 D4 8
+:endloop
+
+// 冬：蓝色光谱 (高低频交替)
+:loop 4
+  C3 8 G4 8 C5 8
+:endloop
+
+// ============================================
+// 动态节奏控制：季节的脉搏
+// ============================================
+@track seasonal_pulse waveform=triangle volume=0.04
+// 几乎听不见，提供节奏骨架
+
+// 春：轻快的3/4拍
+@pattern spring_pulse
+C2 4 C2 4 C2 4
+@end
+
+// 夏：热烈的4/4拍
+@pattern summer_pulse
+C2 4 C2 4 C2 4 C2 4
+@end
+
+// 秋：摇摆的6/8拍
+@pattern autumn_pulse
+C2 8. C2 16 C2 8. C2 16
+@end
+
+// 冬：缓慢的2/2拍
+@pattern winter_pulse
+C2 2 C2 2
+@end
+
+// 按季节切换节奏
+:call spring_pulse
+:call summer_pulse
+:call autumn_pulse
+:call winter_pulse
