@@ -50,56 +50,6 @@ stopBtn.onclick = () => player.stop()
 
 ---
 
-## 🎹 Buzzer Script (BZS) v0.2.1
-
-### 1  Directives
-
-```text
-tempo    = 120    # BPM (global, can change mid‑script)
-waveform = square # sine | square | sawtooth | triangle
-volume   = 0.2    # 0‑1 linear gain
-```
-
-### 2  Track Blocks
-
-```
-@track violin delay=8 waveform=triangle volume=0.15
-C4 4 D4 4 | E4 4 F4 4
-```
-
-- `delay` — beats to wait **from script start** before this track begins.
-- You can declare as many `@track` blocks as you like; otherwise everything
-  belongs to implicit track **main**.
-
-### 3  Notes & Rests
-
-```
-<Note><Octave?> <Denominator>
-C#4 8   # C‑sharp, octave 4, eighth‑note
-Cb4 8   # C‑flat, octave 4, eighth‑note
-R   4   # rest, quarter‑note
-```
-
-- Denominator: `1=whole`, `2=half`, `4=quarter`, `8=eighth`, …
-- Lines may include `|` barlines—they’re ignored by parser.
-
----
-
-## 🎼 Example: Two‑bar Canon in D
-
-```text
-# Canon in D – demo
-tempo=100
-
-@track lead delay=0
-D4 4 E4 4 F#4 4 G4 4 | A4 4 B4 4 C#5 4 D5 4 |
-D4 4 E4 4 F#4 4 G4 4 | A4 4 B4 4 C#5 4 D5 4 |
-
-@track follow delay=16 waveform=triangle
-D4 4 E4 4 F#4 4 G4 4 | A4 4 B4 4 C#5 4 D5 4 |
-D4 4 E4 4 F#4 4 G4 4 | A4 4 B4 4 C#5 4 D5 4 |
-```
-
 More examples in the [./public/demos](./public/demos) folder.
 
 ---
@@ -118,6 +68,24 @@ player.destroy(): Promise<void>
 
 ---
 
+## 🧠 BZS Language Server (Langium LSP)
+
+This repo includes a **BZS Node LSP server (stdio)** powered by Langium.
+The grammar source is `src/BuzzerPlayer/bzs.langium`.
+
+### Run
+
+```bash
+pnpm lsp:bzs
+```
+
+### Hook it up in your editor
+
+- **Neovim (nvim-lspconfig)**: configure the server command as `pnpm lsp:bzs`, and associate `*.bzs` with a `bzs` filetype
+- **VS Code**: you need a client (an extension) to spawn `pnpm lsp:bzs` and communicate via stdio. If you want, I can add a minimal VS Code extension into this repo as well.
+
+---
+
 ## 🗺 Roadmap
 
 - Polyphonic chords in one track (`[C4 E4 G4] 4` syntax)
@@ -132,4 +100,5 @@ PRs & ideas welcome on GitHub!
 
 MIT © 2025 @dragon-fish
 
-Co-developed with ChatGPT-o3 & Claude 3.7
+- 0.2.1 Co-developed with ChatGPT-o3 & Claude 3.7
+- 0.3.0 Co-developed with ChatGPT-5.2, Claude 4.5 Opus, Gemini 3.0 and DeepSeek v3.2

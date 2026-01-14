@@ -1,339 +1,367 @@
-/*
-  BZS (Buzzer Script) parser built with Chevrotain.
-  Produces an AST compatible with the structure we used in PEG.js:
+/**
+ * BZS (Buzzer Script) v0.3.0 parser.
+ *
+ * - 使用 Langium（不再直接依赖 Chevrotain）
+ * - 语法见 `bzs.langium`（通过 Vite `?raw` 作为字符串加载）
+ * - 解析结果会先得到 “扁平元素流”，再做一次语义组装：
+ *   - directives（globals）
+ *   - patterns（@pattern ... @end）
+ *   - tracks（@track ...）
+ *   - loop（:loop/:endloop）结构化并可展开
+ *   - call（:call）保留为节点，供上层展开/编译
+ */
 
-    {
-      globals: { tempo?: number, waveform?: string, volume?: number },
-      tracks: [
-        {
-          name: string,
-          delay: number,
-          waveform?: string | null,
-          volume?: number | null,
-          tokens: TokenNode[]   // flattened melody tokens
-        }
-      ]
-    }
+import { createServicesForGrammar } from 'langium/grammar'
+import { URI } from 'langium'
+import bzsGrammar from './bzs.langium?raw'
 
-  A TokenNode is { type:'note', note:'C', accidental:'#'|'b'|null, octave:number|null, duration:number }
-*/
+export type BzsNumber = number
+export type BzsAtom = string | number
 
-import { createToken, Lexer, CstParser, IToken } from 'chevrotain'
+export type BzsDirectiveMap = Record<string, BzsAtom>
 
-/*──────────────────────────────────────────────────────────*/
-/*  Token Definitions                                      */
-/*──────────────────────────────────────────────────────────*/
+export type BzsLen = { denom: number; dots: 0 | 1 | 2 }
+export type BzsPitch = { note: string; accidental: '#' | 'b' | null; octave: number }
 
-const WhiteSpace = createToken({
-  name: 'WhiteSpace',
-  pattern: /[ \t]+/,
-  group: Lexer.SKIPPED,
-})
-const NewLine = createToken({ name: 'NewLine', pattern: /\r?\n/ })
-const Comment = createToken({
-  name: 'Comment',
-  pattern: /#.*/,
-  group: Lexer.SKIPPED,
-})
+export type BzsKeyValue = { kind: 'kv'; key: string; value: BzsAtom }
 
-const AtTrack = createToken({ name: 'AtTrack', pattern: /@track/ })
-const Equal = createToken({ name: 'Equal', pattern: /=/ })
-const BarLine = createToken({ name: 'BarLine', pattern: /\|+/ })
+export type BzsSeqItem =
+  | { kind: 'note'; pitch: BzsPitch; len: BzsLen }
+  | { kind: 'rest'; len: BzsLen }
+  | { kind: 'chord'; pitches: BzsPitch[]; len: BzsLen }
+  | { kind: 'bar' }
+  | { kind: 'cmd'; name: string; args: (BzsAtom | BzsKeyValue)[] }
+  | { kind: 'call'; name: string }
+  | { kind: 'loop'; count: number | 'inf'; body: BzsSeqItem[] }
 
-const NumberTok = createToken({
-  name: 'NumberTok',
-  pattern: /[0-9]+(?:\.[0-9]+)?/,
-})
-const Identifier = createToken({
-  name: 'Identifier',
-  pattern: /[A-Za-z_][A-Za-z0-9_-]*/,
-})
+export type BzsPattern = { name: string; items: BzsSeqItem[] }
 
-// Note token captures things like C4, C#4, Db3, R, etc.
-const NoteTok = createToken({
-  name: 'NoteTok',
-  pattern: /(?:R|[A-G](?:#|b)?[0-9]?)/,
-})
-
-const AllTokens = [
-  WhiteSpace,
-  Comment,
-  NewLine,
-  AtTrack,
-  Equal,
-  BarLine,
-  NumberTok,
-  NoteTok,
-  Identifier,
-]
-
-const BZSLexer = new Lexer(AllTokens)
-
-/*──────────────────────────────────────────────────────────*/
-/*  Parser                                                 */
-/*──────────────────────────────────────────────────────────*/
-
-type TokenNode = {
-  type: 'note'
-  note: string
-  accidental: '#' | 'b' | null
-  octave: number | null
-  duration: number
-  isRest: boolean
-}
-
-type TrackNode = {
-  name: string
+export type BzsTrackParams = {
   delay: number
-  waveform: string | null
-  volume: number | null
-  tempo: number | null
-  tokens: TokenNode[]
+  waveform?: string
+  volume?: number
+  pan?: number
+  channel?: number
+  duty?: 12 | 25 | 50 | 75
+  sample_bank?: string
+  sample_rate?: number
 }
 
-type Ast = {
-  globals: { tempo?: number; waveform?: string; volume?: number }
-  tracks: TrackNode[]
+export type BzsTrack = { name: string; params: BzsTrackParams; items: BzsSeqItem[] }
+
+export type BzsProgram = {
+  directives: BzsDirectiveMap
+  patterns: Record<string, BzsPattern>
+  tracks: BzsTrack[]
+  errors: BzsParseError[]
+  warnings: BzsParseError[]
 }
 
-class BzsCstParser extends CstParser {
-  constructor() {
-    super(AllTokens, { recoveryEnabled: true })
-    const $ = this as unknown as any
-
-    $.RULE('program', () => {
-      $.MANY(() => $.SUBRULE($.directive))
-      $.AT_LEAST_ONE(() => $.SUBRULE($.trackBlock))
-    })
-
-    /*──────────── Directives ────────────*/
-    $.RULE('directive', () => {
-      $.CONSUME(Identifier)
-      $.CONSUME1(WhiteSpace, { OPT: true })
-      $.CONSUME(Equal)
-      $.CONSUME2(WhiteSpace, { OPT: true })
-      $.CONSUME(NumberTok)
-      $.CONSUME(NewLine)
-    })
-
-    /*──────────── Track Block ───────────*/
-    $.RULE('trackBlock', () => {
-      $.OPTION(() => {
-        $.CONSUME(AtTrack)
-        $.CONSUME(WhiteSpace)
-        $.CONSUME(Identifier)
-        $.MANY(() => $.SUBRULE($.trackOption))
-        $.CONSUME(NewLine)
-      })
-      $.AT_LEAST_ONE(() => $.SUBRULE($.noteLine))
-    })
-
-    $.RULE('trackOption', () => {
-      $.CONSUME(WhiteSpace)
-      $.CONSUME(Identifier)
-      $.CONSUME(Equal)
-      $.CONSUME(NumberTok)
-    })
-
-    $.RULE('noteLine', () => {
-      $.AT_LEAST_ONE_SEP({
-        SEP: WhiteSpace,
-        DEF: () => $.SUBRULE($.noteOrRest),
-      })
-      $.OPTION(() => $.CONSUME(BarLine))
-      $.CONSUME(NewLine)
-    })
-
-    $.RULE('noteOrRest', () => {
-      $.CONSUME(NoteTok)
-      $.CONSUME(WhiteSpace)
-      $.CONSUME(NumberTok)
-    })
-
-    this.performSelfAnalysis()
-  }
+export type BzsParseError = {
+  message: string
+  line?: number
+  column?: number
 }
 
-/*──────────────────────────────────────────────────────────*/
-/*  Wrapper API                                            */
-/*──────────────────────────────────────────────────────────*/
+type LangiumModel = {
+  elements?: any[]
+}
 
 export class BzsParser {
-  private cstParser = new BzsCstParser()
+  private servicesPromise = createServicesForGrammar({
+    grammar: bzsGrammar,
+    languageMetaData: {
+      caseInsensitive: true,
+      fileExtensions: ['.bzs'],
+      languageId: 'bzs',
+      mode: 'development',
+    },
+  })
 
-  parse(text: string): Ast {
-    // 1) Lexing
-    const lexResult = BZSLexer.tokenize(text)
-    if (lexResult.errors.length) throw lexResult.errors[0]
+  async parse(text: string): Promise<BzsProgram> {
+    const services = await this.servicesPromise
+    const uri = URI.parse('memory:/input.bzs')
+    const doc = services.shared.workspace.LangiumDocumentFactory.fromString(text, uri)
 
-    // 2) Parsing (to CST)
-    this.cstParser.input = lexResult.tokens
-    if (this.cstParser.errors.length) throw this.cstParser.errors[0]
+    // 仅单文件：不需要 build workspace；parseResult 已经存在
+    const model = doc.parseResult.value as LangiumModel
 
-    // 3) CST → AST (very lightweight; walk tokens inline)
-    return this.cstToAst(lexResult.tokens)
-  }
-
-  private cstToAst(tokens: IToken[]): Ast {
-    const globals: Record<string, any> = {}
-    const tracks: TrackNode[] = []
-
-    let currentTrack: TrackNode = {
-      name: 'main',
-      delay: 0,
-      waveform: null,
-      volume: null,
-      tempo: null,
-      tokens: [],
-    }
-    let expectingDur = false
-    let pendingNote: TokenNode | null = null
-
-    const pushTrack = () => {
-      if (currentTrack.tokens.length) tracks.push(currentTrack)
+    const errors: BzsParseError[] = []
+    for (const e of doc.parseResult.parserErrors ?? []) {
+      errors.push({
+        message: e.message ?? String(e),
+        line: (e as any).token?.startLine,
+        column: (e as any).token?.startColumn,
+      })
     }
 
-    const numVal = (tok: IToken) => parseFloat(tok.image)
+    const directives: BzsDirectiveMap = {}
+    const patterns: Record<string, BzsPattern> = {}
+    const tracks: BzsTrack[] = []
+    const warnings: BzsParseError[] = []
 
-    // Simple single-pass walk
-    for (let i = 0; i < tokens.length; i++) {
-      const t = tokens[i]
-      switch (t.tokenType) {
-        case Identifier:
-          if (tokens[i + 1]?.tokenType === Equal) {
-            // directive or option – handled when hitting '='
-            continue
+    let currentTrack: BzsTrack | null = null
+    let currentPattern: BzsPattern | null = null
+
+    const flushTrack = () => {
+      if (currentTrack) tracks.push(currentTrack)
+      currentTrack = null
+    }
+    const flushPattern = () => {
+      if (currentPattern) patterns[currentPattern.name] = currentPattern
+      currentPattern = null
+    }
+
+    for (const el of model.elements ?? []) {
+      const t = el?.$type as string | undefined
+      if (!t) continue
+
+      switch (t) {
+        case 'Directive': {
+          const key = String(el.key ?? '')
+            .toLowerCase()
+          if (!key) break
+          directives[key] = this.readAtom(el.value)
+          break
+        }
+        case 'PatternHeader': {
+          flushPattern()
+          const name = String(el.name ?? '')
+          currentPattern = { name, items: [] }
+          break
+        }
+        case 'PatternEnd': {
+          flushPattern()
+          break
+        }
+        case 'TrackHeader': {
+          flushPattern()
+          flushTrack()
+          const name = String(el.name ?? 'main')
+          currentTrack = {
+            name,
+            params: this.readTrackParams(el.params ?? [], errors),
+            items: [],
           }
           break
-        case Equal:
-          const keyTok = tokens[i - 1]
-          const valTok = tokens[i + 1]
-          if (!keyTok || !valTok) continue
-          if (!currentTrack.tokens.length && keyTok.tokenType === Identifier) {
-            // global directive (appears before any notes)
-            const maybeNum = numVal(valTok)
-            const key = keyTok.image.toLowerCase()
-            const val = isNaN(maybeNum) ? String(valTok.image) : maybeNum
-            globals[key] = val
-          } else if (currentTrack && keyTok.tokenType === Identifier) {
-            // track option (after @track)
-            const key = keyTok.image.toLowerCase()
-            if (key === 'delay') currentTrack.delay = numVal(valTok)
-            if (key === 'waveform') currentTrack.waveform = String(valTok.image)
-            if (key === 'volume') currentTrack.volume = numVal(valTok)
-            if (key === 'tempo') currentTrack.tempo = numVal(valTok)
-          }
-          break
-        case AtTrack:
-          pushTrack()
-          i += 1 // skip @track
-
-          // skip whitespace
-          while (i < tokens.length && tokens[i].tokenType === WhiteSpace) {
-            i++
-          }
-
-          if (i < tokens.length && tokens[i].tokenType === Identifier) {
-            const trackName = tokens[i].image
-
-            // Create a new track
-            currentTrack = {
-              name: trackName,
-              delay: 0,
-              waveform: null,
-              volume: null,
-              tempo: null,
-              tokens: [],
-            }
-
-            i++
-
-            while (i < tokens.length && tokens[i].tokenType !== NewLine) {
-              if (tokens[i].tokenType === WhiteSpace) {
-                i++
-                continue
-              }
-
-              // key=value
-              if (
-                i + 2 < tokens.length &&
-                tokens[i].tokenType === Identifier &&
-                tokens[i + 1].tokenType === Equal
-              ) {
-                const paramKey = tokens[i].image.toLowerCase()
-                const valTok = tokens[i + 2]
-
-                if (valTok) {
-                  switch (paramKey) {
-                    case 'delay':
-                      const delayVal = numVal(valTok)
-                      currentTrack.delay = delayVal
-                      break
-                    case 'waveform':
-                      currentTrack.waveform = String(valTok.image)
-                      break
-                    case 'volume':
-                      const volVal = numVal(valTok)
-                      currentTrack.volume = volVal
-                      break
-                    case 'tempo':
-                      const tempoVal = numVal(valTok)
-                      currentTrack.tempo = tempoVal
-                      break
-                  }
-
-                  // skip processed tokens
-                  i += 3
-                } else {
-                  i += 2
-                }
-              } else {
-                i++
+        }
+        default: {
+          const item = this.readSeqItem(el, errors)
+          if (!item) break
+          if (currentPattern) currentPattern.items.push(item)
+          else {
+            if (!currentTrack) {
+              // 不写 @track：允许落在隐式 main（虽然你说不需要向前兼容，但这样更好用）
+              currentTrack = {
+                name: 'main',
+                params: this.readTrackParams([], errors),
+                items: [],
               }
             }
-
-            // No need to i--, as we want the main loop to increment it again to skip the newline
-          } else {
-            // If no track name is found, we create a default track
-            // This is a fallback in case the @track directive is not followed by a valid identifier
-            currentTrack = {
-              name: `unnamed_${tracks.length}`,
-              delay: 0,
-              waveform: null,
-              volume: null,
-              tempo: null,
-              tokens: [],
-            }
+            currentTrack.items.push(item)
           }
-          break
-        case NoteTok:
-          // create stub; duration to fill on next NumberTok
-          const m = t.image.match(/^(R|[A-G])(#|b)?([0-9])?$/)!
-          const isRest = m[1] === 'R'
-          pendingNote = {
-            type: 'note',
-            note: m[1],
-            accidental: (m[2] as any) || null,
-            octave: m[3] ? parseInt(m[3]) : null,
-            duration: 0,
-            isRest: isRest,
-          }
-          expectingDur = true
-          break
-        case NumberTok:
-          if (expectingDur && pendingNote) {
-            pendingNote.duration = parseFloat(t.image)
-            currentTrack.tokens.push(pendingNote)
-            expectingDur = false
-            pendingNote = null
-          }
-          break
-        case NewLine:
-        case BarLine:
-        default:
+        }
       }
     }
-    pushTrack()
-    return { globals, tracks }
+
+    flushPattern()
+    flushTrack()
+
+    // 结构化 loop（把 :loop/:endloop token 转成嵌套节点）
+    for (const p of Object.values(patterns)) {
+      p.items = this.structurizeLoops(p.items, errors)
+    }
+    for (const tr of tracks) {
+      tr.items = this.structurizeLoops(tr.items, errors)
+    }
+
+    return { directives, patterns, tracks, errors, warnings }
+  }
+
+  private readAtom(v: any): BzsAtom {
+    if (v == null) return ''
+    if (typeof v === 'number') return v
+    const s = String(v)
+    const n = Number(s)
+    return Number.isFinite(n) && s.trim() !== '' ? n : s
+  }
+
+  private readLen(el: any, errors: BzsParseError[]): BzsLen | null {
+    const denom = Number(el?.denom)
+    if (!Number.isFinite(denom) || denom <= 0 || !Number.isInteger(denom)) {
+      errors.push({ message: `非法 LEN denom: ${String(el?.denom)}` })
+      return null
+    }
+    const dotsRaw = String(el?.dots ?? '')
+    const dots = dotsRaw === '..' ? 2 : dotsRaw === '.' ? 1 : 0
+    return { denom, dots }
+  }
+
+  private readPitch(el: any, errors: BzsParseError[]): BzsPitch | null {
+    const raw =
+      typeof el === 'string' ? el : typeof el?.value === 'string' ? el.value : String(el ?? '')
+    const m = raw.match(/^([A-Ga-g])(#|b)?([0-9]+)$/)
+    if (!m) {
+      errors.push({ message: `非法音符: ${raw}` })
+      return null
+    }
+    const note = m[1].toUpperCase()
+    const accidental = (m[2] as '#' | 'b' | undefined) ?? null
+    const octave = Number(m[3])
+    if (!Number.isFinite(octave) || !Number.isInteger(octave)) {
+      errors.push({ message: `音符 octave 非整数: ${raw}` })
+      return null
+    }
+    return { note, accidental, octave }
+  }
+
+  private readTrackParams(params: any[], errors: BzsParseError[]): BzsTrackParams {
+    const out: BzsTrackParams = { delay: 0 }
+    for (const p of params ?? []) {
+      const key = String(p?.key ?? '')
+        .toLowerCase()
+      const value = this.readAtom(p?.value)
+      switch (key) {
+        case 'delay':
+          out.delay = Number(value) || 0
+          break
+        case 'waveform':
+          out.waveform = String(value).toLowerCase()
+          break
+        case 'volume':
+          out.volume = Number(value)
+          break
+        case 'pan':
+          out.pan = Number(value)
+          break
+        case 'channel':
+          out.channel = Number(value)
+          break
+        case 'duty': {
+          const d = Number(value)
+          if (d === 12 || d === 25 || d === 50 || d === 75) out.duty = d
+          else errors.push({ message: `duty 仅支持 12/25/50/75，收到: ${String(value)}` })
+          break
+        }
+        case 'sample_bank':
+          out.sample_bank = String(value)
+          break
+        case 'sample_rate':
+          out.sample_rate = Number(value)
+          break
+        default:
+          // 允许扩展参数：忽略
+          break
+      }
+    }
+    return out
+  }
+
+  private readCommandArg(arg: any): BzsAtom | BzsKeyValue | null {
+    if (arg == null) return null
+    if (typeof arg === 'string' || typeof arg === 'number') return this.readAtom(arg)
+
+    const t = arg?.$type as string | undefined
+    if (t === 'CommandArgNode') {
+      if (arg.kvKey != null) {
+        return {
+          kind: 'kv',
+          key: String(arg.kvKey ?? '')
+            .replace(/=$/, '')
+            .toLowerCase(),
+          value: this.readAtom(arg.kvValue),
+        }
+      }
+      if (arg.value != null) return this.readAtom(arg.value)
+    }
+    // 兜底：尽量当作原子值
+    return this.readAtom(arg)
+  }
+
+  private readSeqItem(el: any, errors: BzsParseError[]): BzsSeqItem | null {
+    const t = el?.$type as string | undefined
+    if (!t) return null
+
+    switch (t) {
+      case 'NoteEvent': {
+        const pitch = this.readPitch(el.pitch, errors)
+        const len = this.readLen(el.len, errors)
+        if (!pitch || !len) return null
+        return { kind: 'note', pitch, len }
+      }
+      case 'RestEvent': {
+        const len = this.readLen(el.len, errors)
+        if (!len) return null
+        return { kind: 'rest', len }
+      }
+      case 'ChordEvent': {
+        const pitches = (el.pitches ?? [])
+          .map((p: any) => this.readPitch(p, errors))
+          .filter(Boolean) as BzsPitch[]
+        const len = this.readLen(el.len, errors)
+        if (!len || pitches.length === 0) return null
+        return { kind: 'chord', pitches, len }
+      }
+      case 'StateCommand': {
+        const name = String(el.name ?? '').toLowerCase()
+        const args = (el.args ?? [])
+          .map((a: any) => this.readCommandArg(a))
+          .filter(Boolean) as (BzsAtom | BzsKeyValue)[]
+        return { kind: 'cmd', name, args }
+      }
+      case 'CallCommand': {
+        const name = String(el.name ?? '')
+        return { kind: 'call', name }
+      }
+      case 'LoopStart': {
+        const c = el?.count
+        const raw = typeof c === 'string' || typeof c === 'number' ? c : String(c ?? '')
+        const count = raw === 'inf' ? 'inf' : Number(raw)
+        return { kind: 'loop', count: count === 'inf' ? 'inf' : (count || 0), body: [] }
+      }
+      case 'LoopEnd': {
+        // 作为 token 进入 loop 结构化流程
+        return { kind: 'cmd', name: '__endloop__', args: [] }
+      }
+      case 'BarLine':
+        return { kind: 'bar' }
+      default:
+        return null
+    }
+  }
+
+  private structurizeLoops(items: BzsSeqItem[], errors: BzsParseError[]): BzsSeqItem[] {
+    type Frame = { count: number | 'inf'; body: BzsSeqItem[] }
+    const stack: Frame[] = []
+    const out: BzsSeqItem[] = []
+
+    const pushItem = (it: BzsSeqItem) => {
+      const target = stack.length ? stack[stack.length - 1].body : out
+      target.push(it)
+    }
+
+    for (const it of items) {
+      if (it.kind === 'loop') {
+        stack.push({ count: it.count, body: [] })
+        continue
+      }
+      if (it.kind === 'cmd' && it.name === '__endloop__') {
+        const frame = stack.pop()
+        if (!frame) {
+          errors.push({ message: `:endloop 不匹配（缺少 :loop）` })
+          continue
+        }
+        pushItem({ kind: 'loop', count: frame.count, body: frame.body })
+        continue
+      }
+      pushItem(it)
+    }
+
+    while (stack.length) {
+      stack.pop()
+      errors.push({ message: `:loop 不匹配（缺少 :endloop）` })
+    }
+
+    return out
   }
 }
