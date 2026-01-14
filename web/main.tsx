@@ -1,6 +1,9 @@
 import './style.css'
-import { BuzzerPlayer, BzsRuntimeError } from './BuzzerPlayer/BuzzerPlayer.js'
-import { BzsProgram, BzsPitch } from './BuzzerPlayer/BzsParser.js'
+import {
+  BuzzerPlayer,
+  BzsRuntimeError,
+} from '../src/BuzzerPlayer/BuzzerPlayer.js'
+import { BzsProgram, BzsPitch } from '../src/BuzzerPlayer/BzsParser.js'
 
 const $root = document.getElementById('root') as HTMLElement
 const baseURL = new URL(import.meta.env.BASE_URL, window.location.href)
@@ -108,7 +111,11 @@ const createProject = (name: string, content = ''): Project => {
   }
 }
 
-const updateProject = (projects: Project[], id: string, updates: Partial<Project>): Project[] => {
+const updateProject = (
+  projects: Project[],
+  id: string,
+  updates: Partial<Project>
+): Project[] => {
   return projects.map((p) =>
     p.id === id ? { ...p, ...updates, updatedAt: Date.now() } : p
   )
@@ -130,18 +137,79 @@ const formatPitch = (p: BzsPitch) => `${p.note}${p.accidental ?? ''}${p.octave}`
 
 // ===== Icon Components =====
 const Icons = {
-  play: () => <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v14l11-7-11-7z"/></svg>,
-  pause: () => <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>,
-  stop: () => <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>,
-  plus: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-  copy: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>,
-  trash: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
-  edit: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
-  download: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-  upload: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
-  music: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="5.5" cy="17.5" r="2.5"/><circle cx="18.5" cy="15.5" r="2.5"/><path d="M8 17V5l13-2v12"/></svg>,
-  folder: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>,
-  lock: () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+  play: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M8 5.14v14l11-7-11-7z" />
+    </svg>
+  ),
+  pause: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="4" width="4" height="16" rx="1" />
+      <rect x="14" y="4" width="4" height="16" rx="1" />
+    </svg>
+  ),
+  stop: () => (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="6" width="12" height="12" rx="1" />
+    </svg>
+  ),
+  plus: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  ),
+  copy: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="9" y="9" width="13" height="13" rx="2" />
+      <path d="M5 15V5a2 2 0 0 1 2-2h10" />
+    </svg>
+  ),
+  trash: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 6h18" />
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+      <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+    </svg>
+  ),
+  edit: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  ),
+  download: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  ),
+  upload: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+  ),
+  music: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="5.5" cy="17.5" r="2.5" />
+      <circle cx="18.5" cy="15.5" r="2.5" />
+      <path d="M8 17V5l13-2v12" />
+    </svg>
+  ),
+  folder: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+    </svg>
+  ),
+  lock: () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  ),
 }
 
 // ===== App Component =====
@@ -151,7 +219,7 @@ const App = () => {
   let projects: Project[] = loadProjects()
   let currentProjectId: string | null = loadCurrentProjectId()
   let demoCache: Map<string, string> = new Map()
-  
+
   // Define closeSettings early for use in event handlers
   const closeSettings = () => {
     $settingsDialog.style.display = 'none'
@@ -166,10 +234,10 @@ const App = () => {
         buzzer.stop()
         const content = (e.target as HTMLTextAreaElement).value
         handleScriptChange(content)
-        
+
         // Auto-save for non-demo projects
         if (currentProjectId && !currentProjectId.startsWith('demo-')) {
-          const proj = projects.find(p => p.id === currentProjectId)
+          const proj = projects.find((p) => p.id === currentProjectId)
           if (proj) {
             proj.content = content
             proj.updatedAt = Date.now()
@@ -188,8 +256,8 @@ const App = () => {
     <div className="notes-view">No notes yet.</div>
   ) as HTMLDivElement
   const $settingsDialog = (
-    <div 
-      className="settings-dialog" 
+    <div
+      className="settings-dialog"
       style={{ display: 'none' }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -209,9 +277,15 @@ const App = () => {
       {$progressFill}
     </div>
   ) as HTMLDivElement
-  const $currentTime = (<span className="time-current">0:00</span>) as HTMLSpanElement
-  const $durationTime = (<span className="time-duration">0:00</span>) as HTMLSpanElement
-  const $projectTitle = (<span className="project-title">Untitled</span>) as HTMLSpanElement
+  const $currentTime = (
+    <span className="time-current">0:00</span>
+  ) as HTMLSpanElement
+  const $durationTime = (
+    <span className="time-duration">0:00</span>
+  ) as HTMLSpanElement
+  const $projectTitle = (
+    <span className="project-title">Untitled</span>
+  ) as HTMLSpanElement
 
   const debounce = <T extends (...args: any[]) => any>(fn: T, ms: number) => {
     let timeoutId: any
@@ -230,7 +304,7 @@ const App = () => {
   // ===== Project Management =====
   const renderProjectList = () => {
     $projectList.innerHTML = ''
-    
+
     // Demo section
     const $demoSection = (
       <div className="project-section">
@@ -276,7 +350,11 @@ const App = () => {
         <div className="section-header">
           <Icons.folder />
           <span>我的工程</span>
-          <button className="icon-btn add-btn" title="新建工程" onClick={createNewProject}>
+          <button
+            className="icon-btn add-btn"
+            title="新建工程"
+            onClick={createNewProject}
+          >
             <Icons.plus />
           </button>
         </div>
@@ -285,14 +363,14 @@ const App = () => {
 
     if (projects.length === 0) {
       const $empty = (
-        <div className="empty-hint">
-          暂无工程，点击 + 新建
-        </div>
+        <div className="empty-hint">暂无工程，点击 + 新建</div>
       ) as HTMLDivElement
       $userSection.appendChild($empty)
     } else {
       // Sort by updated time (most recent first)
-      const sortedProjects = [...projects].sort((a, b) => b.updatedAt - a.updatedAt)
+      const sortedProjects = [...projects].sort(
+        (a, b) => b.updatedAt - a.updatedAt
+      )
       sortedProjects.forEach((proj) => {
         const isActive = currentProjectId === proj.id
         const $item = (
@@ -460,7 +538,7 @@ track melody:
 
     projects = updateProject(projects, id, { name })
     saveProjects(projects)
-    
+
     if (currentProjectId === id) {
       $projectTitle.textContent = name
     }
@@ -532,36 +610,43 @@ track melody:
       <div className="settings-content" onClick={(e) => e.stopPropagation()}>
         <div className="settings-header">
           <h3>设置</h3>
-          <button className="close-btn" onClick={closeSettings}>×</button>
+          <button className="close-btn" onClick={closeSettings}>
+            ×
+          </button>
         </div>
         <div className="settings-body">
           <div className="setting-item">
             <label>
               主音量
-              <span className="setting-value" id="volume-value">{(currentVolume * 100).toFixed(0)}%</span>
+              <span className="setting-value" id="volume-value">
+                {(currentVolume * 100).toFixed(0)}%
+              </span>
             </label>
-            <input 
-              type="range" 
-              min="0" 
-              max="100" 
+            <input
+              type="range"
+              min="0"
+              max="100"
               value={currentVolume * 100}
               onInput={(e) => {
                 const val = Number((e.target as HTMLInputElement).value) / 100
                 buzzer.options.masterVolume = val
                 const $volumeValue = document.getElementById('volume-value')
-                if ($volumeValue) $volumeValue.textContent = `${(val * 100).toFixed(0)}%`
+                if ($volumeValue)
+                  $volumeValue.textContent = `${(val * 100).toFixed(0)}%`
               }}
             />
           </div>
           <div className="setting-item">
             <label>
               默认 BPM
-              <span className="setting-value" id="tempo-value">{currentTempo}</span>
+              <span className="setting-value" id="tempo-value">
+                {currentTempo}
+              </span>
             </label>
-            <input 
-              type="range" 
-              min="40" 
-              max="240" 
+            <input
+              type="range"
+              min="40"
+              max="240"
               value={currentTempo}
               onInput={(e) => {
                 const val = Number((e.target as HTMLInputElement).value)
@@ -573,10 +658,12 @@ track melody:
           </div>
           <div className="setting-item">
             <label>默认波形</label>
-            <select 
+            <select
               value={String(buzzer.options.defaultWaveform)}
               onChange={(e) => {
-                buzzer.options.defaultWaveform = (e.target as HTMLSelectElement).value
+                buzzer.options.defaultWaveform = (
+                  e.target as HTMLSelectElement
+                ).value
               }}
             >
               <option value="sine">正弦波 (Sine)</option>
@@ -593,9 +680,17 @@ track melody:
               <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;">
                 轻量级的浏览器端"蜂鸣器"旋律播放库
               </p>
-              <a href="https://github.com/dragon-fish/buzzer-player" target="_blank" rel="noopener noreferrer">
-                <svg viewBox="0 0 24 24" fill="currentColor" style="width: 16px; height: 16px;">
-                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              <a
+                href="https://github.com/dragon-fish/buzzer-player"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  style="width: 16px; height: 16px;"
+                >
+                  <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
                 </svg>
                 在 GitHub 上查看项目
               </a>
@@ -857,19 +952,19 @@ track melody:
     <div className="app-container">
       <header>
         <h1>Buzzer Player v0.3</h1>
-        <div className="header-project-info">
-          {$projectTitle}
-        </div>
+        <div className="header-project-info">{$projectTitle}</div>
         <div className="header-actions">
-          <button 
-            className="header-btn" 
+          <button
+            className="header-btn"
             title="导出当前工程"
             onClick={() => {
               if (currentProjectId) {
                 if (currentProjectId.startsWith('demo-')) {
-                  const demo = demoList.find(d => d.id === currentProjectId)
+                  const demo = demoList.find((d) => d.id === currentProjectId)
                   if (demo) {
-                    const blob = new Blob([$notesInput.value], { type: 'text/plain;charset=utf-8' })
+                    const blob = new Blob([$notesInput.value], {
+                      type: 'text/plain;charset=utf-8',
+                    })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')
                     a.href = url
@@ -888,25 +983,29 @@ track melody:
             <Icons.download />
             <span>导出</span>
           </button>
-          <button 
-            className="header-btn" 
-            title="设置"
-            onClick={showSettings}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m7.08 7.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m7.08-7.08l4.24-4.24"/>
+          <button className="header-btn" title="设置" onClick={showSettings}>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m7.08 7.08l4.24 4.24M1 12h6m6 0h6M4.22 19.78l4.24-4.24m7.08-7.08l4.24-4.24" />
             </svg>
           </button>
-          <button 
-            className="header-btn" 
+          <button
+            className="header-btn"
             title="GitHub 仓库"
             onClick={() => {
-              window.open('https://github.com/dragon-fish/buzzer-player', '_blank')
+              window.open(
+                'https://github.com/dragon-fish/buzzer-player',
+                '_blank'
+              )
             }}
           >
             <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
             </svg>
             <span>GitHub</span>
           </button>
@@ -915,26 +1014,34 @@ track melody:
 
       <div className="sidebar">
         <div className="sidebar-toolbar">
-          <button className="toolbar-btn" onClick={createNewProject} title="新建工程">
+          <button
+            className="toolbar-btn"
+            onClick={createNewProject}
+            title="新建工程"
+          >
             <Icons.plus />
             <span>新建</span>
           </button>
-          <button className="toolbar-btn" onClick={importProject} title="导入工程">
+          <button
+            className="toolbar-btn"
+            onClick={importProject}
+            title="导入工程"
+          >
             <Icons.upload />
             <span>导入</span>
           </button>
         </div>
         {$projectList}
         <div className="sidebar-footer">
-          <a 
-            href="https://github.com/dragon-fish/buzzer-player" 
-            target="_blank" 
+          <a
+            href="https://github.com/dragon-fish/buzzer-player"
+            target="_blank"
             rel="noopener noreferrer"
             className="github-link"
             title="在 GitHub 上查看项目"
           >
             <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
             </svg>
             <span>dragon-fish/buzzer-player</span>
           </a>

@@ -1,0 +1,40 @@
+# 源代码开发相关
+examples/
+docs/
+node_modules/
+*.log
+.DS_Store
+
+# 构建配置
+vite.config.web.ts
+tsconfig.json
+tsconfig.lib.json
+
+# Git 相关
+.git/
+.gitignore
+.gitattributes
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 测试
+*.test.ts
+*.test.js
+__tests__/
+coverage/
+
+# Web 构建产物（只发布库文件）
+dist-web/
+dist/assets/
+dist/index.html
+dist/demos/
+dist/vite.svg
+
+# 其他
+pnpm-lock.yaml
+pnpm-workspace.yaml
+.cursor/

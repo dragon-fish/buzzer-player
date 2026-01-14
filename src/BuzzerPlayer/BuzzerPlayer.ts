@@ -1,9 +1,18 @@
-import { BzsParser, type BzsAtom, type BzsKeyValue, type BzsParseError, type BzsPitch, type BzsProgram, type BzsSeqItem } from './BzsParser.js'
+import {
+  BzsParser,
+  type BzsAtom,
+  type BzsKeyValue,
+  type BzsParseError,
+  type BzsPitch,
+  type BzsProgram,
+  type BzsSeqItem,
+} from './BzsParser.js'
 import { collectBarlineAlignmentWarnings } from './diagnostics.js'
 
 export class BuzzerPlayer {
-  private ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
-  private options: Required<BuzzerPlayerOptions>
+  private ctx = new (window.AudioContext ||
+    (window as any).webkitAudioContext)()
+  readonly options: Required<BuzzerPlayerOptions>
   private scheduled: AudioNode[] = []
   private playing = false
   private preparing = false
@@ -57,19 +66,19 @@ export class BuzzerPlayer {
     this._program = program
     this._timeline = this.compile(program)
     const last = this._timeline[this._timeline.length - 1]
-    this._duration = last ? (last.endSec ?? (last.startSec + last.durSec)) : 0
+    this._duration = last ? last.endSec ?? last.startSec + last.durSec : 0
     return program
   }
 
   async playScript(script: string, fromTime = 0): Promise<void> {
     if (this.playing) await this.stop()
     this.preparing = true
-    
+
     try {
       if (this.ctx.state === 'suspended') await this.ctx.resume()
 
       const program = await this.load(script)
-      
+
       if (program.errors.length) {
         throw new BzsRuntimeError('BZS 解析失败', program.errors)
       }
@@ -83,7 +92,7 @@ export class BuzzerPlayer {
       const offset = Math.max(0, Math.min(fromTime, this._duration))
       this._startTime = this.ctx.currentTime + 0.05 - offset
       const startAt = this._startTime
-      
+
       this.playing = true
       this.preparing = false
 
@@ -143,10 +152,10 @@ export class BuzzerPlayer {
 
   async seek(targetTime: number): Promise<void> {
     if (!this._timeline.length || !this._program) return
-    
+
     const wasPlaying = this.playing
     const wasPaused = this.ctx.state === 'suspended'
-    
+
     // Stop all currently scheduled audio
     for (const n of this.scheduled) {
       try {
@@ -155,36 +164,36 @@ export class BuzzerPlayer {
       } catch (_) {}
     }
     this.scheduled = []
-    
+
     if (!wasPlaying) {
       // If not playing, just update internal state for visual feedback
       this._startTime = this.ctx.currentTime - targetTime
       return
     }
-    
+
     // If paused, just update position without resuming
     if (wasPaused) {
       // Need to temporarily resume to get accurate currentTime, then pause again
       await this.ctx.resume()
       const newStartTime = this.ctx.currentTime - targetTime
       this._startTime = newStartTime
-      
+
       // Reschedule events for when playback resumes
       for (const ev of this._timeline) {
         if (ev.kind === 'rest') continue
         if (ev.endSec! <= targetTime) continue
         this.scheduleVoice(ev, newStartTime)
       }
-      
+
       // Pause again
       await this.ctx.suspend()
       return
     }
-    
+
     // Reschedule from new position (playing state)
     const newStartTime = this.ctx.currentTime - targetTime
     this._startTime = newStartTime
-    
+
     // Schedule all events that haven't finished yet
     for (const ev of this._timeline) {
       if (ev.kind === 'rest') continue
@@ -217,7 +226,9 @@ export class BuzzerPlayer {
       0,
       1
     )
-    const defaultWaveform = String(program.directives['waveform'] ?? this.options.defaultWaveform).toLowerCase()
+    const defaultWaveform = String(
+      program.directives['waveform'] ?? this.options.defaultWaveform
+    ).toLowerCase()
     const timeSignatureRaw = program.directives['time_signature']
 
     const patterns = program.patterns
@@ -233,7 +244,12 @@ export class BuzzerPlayer {
       const baseVol = clamp(tr.params.volume ?? 1.0, 0, 1)
       const pan = tr.params.pan
 
-      const expanded = this.expandSequence(tr.items, patterns, this.options.maxScheduleSec, initTempo)
+      const expanded = this.expandSequence(
+        tr.items,
+        patterns,
+        this.options.maxScheduleSec,
+        initTempo
+      )
       // 方案 A：拍号仅用于可读性/对齐检查（不影响播放）
       program.warnings?.push(
         ...collectBarlineAlignmentWarnings({
@@ -366,22 +382,46 @@ export class BuzzerPlayer {
       if (it.kind === 'call') {
         const p = patterns[it.name]
         if (!p) throw new Error(`未知 pattern: ${it.name}`)
-        const expanded = this.expandSequence(p.items, patterns, maxScheduleSec, initTempo, depth + 1)
+        const expanded = this.expandSequence(
+          p.items,
+          patterns,
+          maxScheduleSec,
+          initTempo,
+          depth + 1
+        )
         for (const x of expanded) pushItem(x)
         continue
       }
       if (it.kind === 'loop') {
         if (it.count === 'inf') {
           while (beatsAcc < maxBeats) {
-            const expanded = this.expandSequence(it.body, patterns, maxScheduleSec, initTempo, depth + 1)
+            const expanded = this.expandSequence(
+              it.body,
+              patterns,
+              maxScheduleSec,
+              initTempo,
+              depth + 1
+            )
             for (const x of expanded) pushItem(x)
             // 如果 body 没有任何耗时事件，避免死循环
-            if (!expanded.some((x) => x.kind === 'note' || x.kind === 'rest' || x.kind === 'chord')) break
+            if (
+              !expanded.some(
+                (x) =>
+                  x.kind === 'note' || x.kind === 'rest' || x.kind === 'chord'
+              )
+            )
+              break
           }
         } else {
           const n = Math.max(0, Math.floor(it.count))
           for (let i = 0; i < n && beatsAcc < maxBeats; i++) {
-            const expanded = this.expandSequence(it.body, patterns, maxScheduleSec, initTempo, depth + 1)
+            const expanded = this.expandSequence(
+              it.body,
+              patterns,
+              maxScheduleSec,
+              initTempo,
+              depth + 1
+            )
             for (const x of expanded) pushItem(x)
           }
         }
@@ -393,7 +433,10 @@ export class BuzzerPlayer {
     return out
   }
 
-  private applyCommand(cmd: Extract<BzsSeqItem, { kind: 'cmd' }>, state: TrackState) {
+  private applyCommand(
+    cmd: Extract<BzsSeqItem, { kind: 'cmd' }>,
+    state: TrackState
+  ) {
     const a0 = cmd.args[0]
     const kv = (k: string): BzsAtom | undefined => {
       for (const a of cmd.args) {
@@ -496,7 +539,10 @@ export class BuzzerPlayer {
   /*  Scheduling                                                             */
   /*──────────────────────────────────────────────────────────────────────────*/
 
-  private scheduleVoice(ev: Exclude<TimelineEvent, { kind: 'rest' }>, startAt: number) {
+  private scheduleVoice(
+    ev: Exclude<TimelineEvent, { kind: 'rest' }>,
+    startAt: number
+  ) {
     const when = startAt + ev.startSec
     const beatSec = 60 / ev.tempo
     const tickSec = beatSec / ev.ticksPerBeat
@@ -509,7 +555,11 @@ export class BuzzerPlayer {
     gain.gain.value = 0
 
     let outNode: AudioNode = gain
-    if (typeof ev.pan === 'number' && Number.isFinite(ev.pan) && (this.ctx as any).createStereoPanner) {
+    if (
+      typeof ev.pan === 'number' &&
+      Number.isFinite(ev.pan) &&
+      (this.ctx as any).createStereoPanner
+    ) {
       const panner = (this.ctx as any).createStereoPanner() as StereoPannerNode
       panner.pan.value = clamp(ev.pan, -1, 1)
       gain.connect(panner)
@@ -522,7 +572,14 @@ export class BuzzerPlayer {
         const { src, filter } = this.createNoiseSource(when, ev.freq)
         src.connect(filter)
         filter.connect(gain)
-        this.applyEnvelope(gain.gain, when, ev.volume, soundDur, tickSec, ev.env)
+        this.applyEnvelope(
+          gain.gain,
+          when,
+          ev.volume,
+          soundDur,
+          tickSec,
+          ev.env
+        )
         src.start(when)
         src.stop(stopAt)
         this.scheduled.push(src, filter, gain, outNode)
@@ -546,7 +603,14 @@ export class BuzzerPlayer {
         const { src, filter } = this.createNoiseSource(when, center)
         src.connect(filter)
         filter.connect(gain)
-        this.applyEnvelope(gain.gain, when, ev.volume, soundDur, tickSec, ev.env)
+        this.applyEnvelope(
+          gain.gain,
+          when,
+          ev.volume,
+          soundDur,
+          tickSec,
+          ev.env
+        )
         src.start(when)
         src.stop(stopAt)
         this.scheduled.push(src, filter, gain, outNode)
@@ -569,7 +633,10 @@ export class BuzzerPlayer {
     }
   }
 
-  private createSourceOsc(waveform: Exclude<BzsWaveform, 'noise'>, duty: number): OscillatorNode {
+  private createSourceOsc(
+    waveform: Exclude<BzsWaveform, 'noise'>,
+    duty: number
+  ): OscillatorNode {
     const osc = this.ctx.createOscillator()
     if (waveform === 'pulse') {
       const wave = this.getPulseWave(duty)
@@ -591,7 +658,10 @@ export class BuzzerPlayer {
     return buf
   }
 
-  private createNoiseSource(when: number, centerFreq: number): { src: AudioBufferSourceNode; filter: BiquadFilterNode } {
+  private createNoiseSource(
+    when: number,
+    centerFreq: number
+  ): { src: AudioBufferSourceNode; filter: BiquadFilterNode } {
     const src = this.ctx.createBufferSource()
     src.buffer = this.getNoiseBuffer()
     src.loop = true
@@ -605,7 +675,14 @@ export class BuzzerPlayer {
   }
 
   private getPulseWave(dutyPercent: number): PeriodicWave {
-    const d = dutyPercent === 12 ? 12 : dutyPercent === 25 ? 25 : dutyPercent === 75 ? 75 : 50
+    const d =
+      dutyPercent === 12
+        ? 12
+        : dutyPercent === 25
+        ? 25
+        : dutyPercent === 75
+        ? 75
+        : 50
     const cached = this.pulseWaveCache.get(d)
     if (cached) return cached
 
@@ -617,7 +694,9 @@ export class BuzzerPlayer {
       imag[n] = (2 / (n * Math.PI)) * Math.sin(n * Math.PI * duty)
       real[n] = 0
     }
-    const wave = this.ctx.createPeriodicWave(real, imag, { disableNormalization: false })
+    const wave = this.ctx.createPeriodicWave(real, imag, {
+      disableNormalization: false,
+    })
     this.pulseWaveCache.set(d, wave)
     return wave
   }
@@ -658,7 +737,10 @@ export class BuzzerPlayer {
     return rSec
   }
 
-  private resolveEnv(env: EnvState | null, tickSec: number): { aSec: number; dSec: number; sLevel: number; rSec: number } {
+  private resolveEnv(
+    env: EnvState | null,
+    tickSec: number
+  ): { aSec: number; dSec: number; sLevel: number; rSec: number } {
     if (!env) {
       return { aSec: 0.002, dSec: 0.01, sLevel: 1, rSec: 0.01 }
     }
@@ -667,9 +749,19 @@ export class BuzzerPlayer {
         case 'pluck':
           return { aSec: 0, dSec: 12 * tickSec, sLevel: 0.2, rSec: 8 * tickSec }
         case 'lead':
-          return { aSec: 2 * tickSec, dSec: 8 * tickSec, sLevel: 0.7, rSec: 8 * tickSec }
+          return {
+            aSec: 2 * tickSec,
+            dSec: 8 * tickSec,
+            sLevel: 0.7,
+            rSec: 8 * tickSec,
+          }
         case 'pad':
-          return { aSec: 12 * tickSec, dSec: 12 * tickSec, sLevel: 0.8, rSec: 16 * tickSec }
+          return {
+            aSec: 12 * tickSec,
+            dSec: 12 * tickSec,
+            sLevel: 0.8,
+            rSec: 16 * tickSec,
+          }
         case 'perc':
           return { aSec: 0, dSec: 6 * tickSec, sLevel: 0, rSec: 6 * tickSec }
         default:
@@ -684,18 +776,30 @@ export class BuzzerPlayer {
     }
   }
 
-  private applyPitchAutomation(osc: OscillatorNode, ev: Extract<TimelineEvent, { kind: 'tone' }>, when: number, tickSec: number, soundDur: number) {
+  private applyPitchAutomation(
+    osc: OscillatorNode,
+    ev: Extract<TimelineEvent, { kind: 'tone' }>,
+    when: number,
+    tickSec: number,
+    soundDur: number
+  ) {
     const target = ev.freq
     // slide
     if (ev.slide && ev.lastFreq && Number.isFinite(ev.lastFreq)) {
       osc.frequency.setValueAtTime(ev.lastFreq, when)
       if (ev.slide.mode === 'time') {
         const t = Math.max(0, ev.slide.time) * tickSec
-        osc.frequency.linearRampToValueAtTime(target, when + Math.min(t, soundDur))
+        osc.frequency.linearRampToValueAtTime(
+          target,
+          when + Math.min(t, soundDur)
+        )
       } else if (ev.slide.mode === 'speed') {
         const semi = freqToSemitoneDelta(ev.lastFreq, target)
-        const t = Math.abs(semi) / Math.max(1e-6, ev.slide.speed) * tickSec
-        osc.frequency.linearRampToValueAtTime(target, when + Math.min(t, soundDur))
+        const t = (Math.abs(semi) / Math.max(1e-6, ev.slide.speed)) * tickSec
+        osc.frequency.linearRampToValueAtTime(
+          target,
+          when + Math.min(t, soundDur)
+        )
       } else {
         osc.frequency.setValueAtTime(target, when)
       }
@@ -719,7 +823,9 @@ export class BuzzerPlayer {
     }
   }
 
-  private resolveArpFreqs(ev: Extract<TimelineEvent, { kind: 'tone' }>): number[] {
+  private resolveArpFreqs(
+    ev: Extract<TimelineEvent, { kind: 'tone' }>
+  ): number[] {
     const arp = ev.arp
     if (!arp) return []
     if (arp.mode === 'semi') {
@@ -736,7 +842,13 @@ export class BuzzerPlayer {
     return out
   }
 
-  private applyVibrato(osc: OscillatorNode, ev: Extract<TimelineEvent, { kind: 'tone' | 'chord' }>, when: number, stopAt: number, tickSec: number) {
+  private applyVibrato(
+    osc: OscillatorNode,
+    ev: Extract<TimelineEvent, { kind: 'tone' | 'chord' }>,
+    when: number,
+    stopAt: number,
+    tickSec: number
+  ) {
     if (!ev.vib) return
     const depthCents = ev.vib.depth * 100
     if (!Number.isFinite(depthCents) || depthCents === 0) return
@@ -821,7 +933,7 @@ export class BzsRuntimeError extends Error {
   }
 }
 
-type BzsWaveform = OscillatorType | 'pulse' | 'noise'
+export type BzsWaveform = OscillatorType | 'pulse' | 'noise'
 
 type TrackState = {
   tempo: number
@@ -836,26 +948,26 @@ type TrackState = {
   noise: { mode?: string; pitch?: number }
 }
 
-type EnvState =
+export type EnvState =
   | { kind: 'preset'; name: string }
   | { kind: 'adsr'; a: number; d: number; s: number; r: number }
 
-type ArpState = {
+export type ArpState = {
   mode: 'semi' | 'note'
   x: BzsAtom
   y: BzsAtom
   rate: number
 }
 
-type VibState = { depth: number; rate: number }
+export type VibState = { depth: number; rate: number }
 
-type SlideState =
+export type SlideState =
   | { mode: 'time'; time: number }
   | { mode: 'speed'; speed: number }
 
-type TimelineEvent =
+export type TimelineEvent =
   | { kind: 'rest'; startSec: number; durSec: number; endSec?: number }
-  | ({
+  | {
       kind: 'tone'
       startSec: number
       durSec: number
@@ -874,8 +986,8 @@ type TimelineEvent =
       ticksPerBeat: number
       tempo: number
       pan?: number
-    })
-  | ({
+    }
+  | {
       kind: 'chord'
       startSec: number
       durSec: number
@@ -892,7 +1004,7 @@ type TimelineEvent =
       ticksPerBeat: number
       tempo: number
       pan?: number
-    })
+    }
 
 function clamp(n: number, lo: number, hi: number) {
   if (!Number.isFinite(n)) return lo
@@ -934,5 +1046,9 @@ function freqToSemitoneDelta(from: number, to: number): number {
 function parsePitchLiteral(s: string): BzsPitch | null {
   const m = String(s).match(/^([A-Ga-g])(#|b)?([0-9]+)$/)
   if (!m) return null
-  return { note: m[1].toUpperCase(), accidental: (m[2] as any) ?? null, octave: Number(m[3]) }
+  return {
+    note: m[1].toUpperCase(),
+    accidental: (m[2] as any) ?? null,
+    octave: Number(m[3]),
+  }
 }
