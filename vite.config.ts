@@ -1,14 +1,21 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'node:path'
+import dts from 'unplugin-dts/vite'
 
 // 库模式构建配置
 export default defineConfig({
+  plugins: [
+    dts({
+      tsconfigPath: resolve(import.meta.dirname, 'tsconfig.lib.json'),
+      bundleTypes: true,
+    }),
+  ],
   build: {
     lib: {
       entry: resolve(import.meta.dirname, 'src/index.ts'),
       name: 'BuzzerPlayer',
       formats: ['es', 'cjs'],
-      fileName: (format) => `buzzer-player.${format === 'es' ? 'mjs' : 'cjs'}`,
+      fileName: (format) => `index.${format === 'es' ? 'mjs' : 'cjs'}`,
     },
     rollupOptions: {
       // 确保外部化不应该打包到库中的依赖
